@@ -1,0 +1,17 @@
+# Redirecionamentos 301 necessários na virada (formato: origem  destino).
+# Traduza para o formato do host escolhido (_redirects, vercel.json, .htaccess, nginx).
+#
+# 1) Domínio: www.isnap.com.br -> https://isnap.com.br  (o site atual já faz isso) e http -> https
+# 2) Barra final: /pagina -> /pagina/  (o site atual já faz isso)
+#
+/home/                      /                 301
+/sitemap_index.xml          /sitemap.xml      301
+/wp-sitemap.xml             /sitemap.xml      301
+/post-sitemap.xml           /sitemap.xml      301
+/page-sitemap.xml           /sitemap.xml      301
+/category-sitemap.xml       /sitemap.xml      301
+/post_tag-sitemap.xml       /sitemap.xml      301
+/author-sitemap.xml         /sitemap.xml      301
+/feed/                      /blog/            301
+/comments/feed/             /blog/            301
+/blog/page/2/               /blog/            301

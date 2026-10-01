@@ -1,0 +1,37 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "trailingSlash": true,
+  "cleanUrls": false,
+  "redirects": [
+    { "source": "/(.*)", "has": [{ "type": "host", "value": "www.isnap.com.br" }], "destination": "https://isnap.com.br/$1", "permanent": true },
+    { "source": "/home/", "destination": "/", "permanent": true },
+    { "source": "/sitemap_index.xml", "destination": "/sitemap.xml", "permanent": true },
+    { "source": "/wp-sitemap.xml", "destination": "/sitemap.xml", "permanent": true },
+    { "source": "/(post|page|category|post_tag|author)-sitemap.xml", "destination": "/sitemap.xml", "permanent": true },
+    { "source": "/feed/", "destination": "/blog/", "permanent": true },
+    { "source": "/comments/feed/", "destination": "/blog/", "permanent": true },
+    { "source": "/blog/page/:n", "destination": "/blog/", "permanent": true }
+  ],
+  "headers": [
+    {
+      "source": "/wp-content/uploads/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "source": "/(styles.css|site.css|site.js)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" }
+      ]
+    }
+  ]
+}
