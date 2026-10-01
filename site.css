@@ -366,14 +366,14 @@
 .rotation-card h3 { color: #fff; }
 
 /* ---------- Hero da home: banner em tela cheia no lugar da caixa decorativa ---------- */
-.hero-banner { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 78% center; z-index: 1; }
+.hero-banner { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 78% 6%; z-index: 1; }
 .hero-banner-fade { position: absolute; inset: 0; z-index: 2;
   background: linear-gradient(90deg, var(--ink) 0%, rgba(12, 48, 61, .92) 24%, rgba(12, 48, 61, .55) 46%, rgba(12, 48, 61, .1) 66%),
               linear-gradient(0deg, var(--ink) 0%, rgba(12, 48, 61, 0) 28%); }
 .hero-has-banner .hero-layout { grid-template-columns: 1fr; }
 .hero-has-banner .hero-copy { max-width: 640px; }
 @media (max-width: 760px) {
-  .hero-banner { object-position: 72% center; opacity: .5; }
+  .hero-banner { object-position: 72% 6%; opacity: .5; }
   .hero-banner-fade {
     background: linear-gradient(0deg, var(--ink) 0%, var(--ink) 46%, rgba(12, 48, 61, .55) 68%, rgba(12, 48, 61, .3) 100%),
                 linear-gradient(90deg, var(--ink) 0%, rgba(12, 48, 61, .75) 60%, rgba(12, 48, 61, .4) 100%);
