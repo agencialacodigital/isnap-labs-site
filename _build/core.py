@@ -13,6 +13,8 @@ ORIGIN = 'https://isnap.com.br'
 WHATSAPP = '554499922804'
 WA_TEXT = 'Olá, venho do site da iSnap Labs e quero agendar uma consultoria estratégica.'
 WA_URL = 'https://api.whatsapp.com/send?phone=%s&text=%s' % (WHATSAPP, WA_TEXT.replace(' ', '%20'))
+WA_POPUP_TEXT = 'Olá, estou vindo do site da iSnap Labs e gostaria de mais informações.'
+WA_POPUP_URL = 'https://api.whatsapp.com/send?phone=%s&text=%s' % (WHATSAPP, WA_POPUP_TEXT.replace(' ', '%20'))
 EMAIL = 'voe@isnap.com.br'
 CLIENT_AREA_URL = 'https://app.isnap.com.br/'
 ADDRESS = 'Av. Advogado Horácio Raccanello Filho, 5570 – Zona 07, Maringá / PR – CEP 87020-035'
@@ -325,6 +327,36 @@ def footer_html():
                   esc(ADDRESS), phones, EMAIL, EMAIL)
 
 
+WA_ICON = ('<svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true"><path d="M16.004 3C9.096 3 3.48 8.56 3.48 15.4c0 2.42.666 4.68 1.823 6.62L3 29l7.2-2.26a12.98 12.98 0 0 0 5.8 1.37h.004c6.906 0 12.522-5.56 12.522-12.4C28.526 8.56 22.91 3 16.004 3Zm0 22.66h-.003a10.5 10.5 0 0 1-5.35-1.47l-.384-.23-4.273 1.34 1.36-4.17-.25-.43a10.28 10.28 0 0 1-1.58-5.5c0-5.68 4.63-10.3 10.483-10.3 5.85 0 10.48 4.62 10.48 10.3 0 5.68-4.63 10.46-10.483 10.46Zm5.74-7.73c-.31-.156-1.84-.91-2.126-1.015-.286-.104-.494-.156-.702.157-.207.312-.806 1.014-.988 1.222-.182.208-.364.234-.675.078-.31-.156-1.31-.486-2.496-1.55-.923-.828-1.546-1.85-1.728-2.163-.182-.312-.02-.48.137-.636.14-.14.311-.364.467-.546.156-.182.207-.312.311-.52.104-.208.052-.39-.026-.546-.078-.156-.702-1.705-.962-2.335-.253-.61-.51-.527-.702-.537l-.598-.01c-.207 0-.546.078-.832.39-.286.312-1.09 1.07-1.09 2.61 0 1.54 1.116 3.028 1.272 3.237.156.208 2.195 3.38 5.318 4.74.743.323 1.323.516 1.775.66.746.238 1.424.205 1.96.124.598-.09 1.84-.753 2.1-1.48.26-.728.26-1.352.182-1.482-.078-.13-.285-.208-.597-.364Z"/></svg>')
+
+
+def whatsapp_widget_html():
+    return """<a class="wa-float" href="%s" target="_blank" rel="noopener" aria-label="Falar no WhatsApp" data-wa-fallback>
+    <span class="wa-float-ping" aria-hidden="true"></span>
+    %s
+  </a>
+
+  <div class="wa-modal" id="wa-modal" aria-hidden="true">
+    <div class="wa-modal-backdrop" data-wa-close></div>
+    <div class="wa-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="wa-modal-title">
+      <header class="wa-modal-head">
+        <h2 id="wa-modal-title">Olá! Preencha os campos abaixo para iniciar a conversa no WhatsApp</h2>
+        <button type="button" class="wa-modal-close" data-wa-close aria-label="Fechar">×</button>
+      </header>
+      <form class="wa-modal-body" id="wa-popup-form" novalidate>
+        <label class="wa-field"><span class="sr-only">Nome</span><input type="text" name="nome" placeholder="Nome" autocomplete="name" required /></label>
+        <label class="wa-field"><span class="sr-only">E-mail</span><input type="email" name="email" placeholder="E-mail" autocomplete="email" required /></label>
+        <label class="wa-field"><span class="sr-only">WhatsApp</span><input type="tel" name="telefone" placeholder="WhatsApp" autocomplete="tel" required /></label>
+        <label class="wa-robot"><input type="checkbox" name="robo" required /><span>Não sou um robô</span></label>
+        <button type="submit" class="wa-submit">%s Iniciar a conversa</button>
+        <p class="wa-consent">Ao informar meus dados, eu concordo com a <a href="/politica-de-privacidade/">Política de Privacidade</a>.</p>
+      </form>
+    </div>
+  </div>
+
+  """ % (esc(WA_POPUP_URL), WA_ICON, WA_ICON)
+
+
 def layout(path, seo, body, current=None, home=False):
     return """<!doctype html>
 <html lang="pt-BR">
@@ -349,10 +381,12 @@ def layout(path, seo, body, current=None, home=False):
 %s
   %s
 
+  %s
   <script src="/site.js?v=%s"></script>
 </body>
 </html>
-""" % (seo, VERSION, VERSION, TRACKING, 'home-page' if home else 'inner-page', header_html(current, home), body, footer_html(), VERSION)
+""" % (seo, VERSION, VERSION, TRACKING, 'home-page' if home else 'inner-page', header_html(current, home), body, footer_html(),
+       whatsapp_widget_html(), VERSION)
 
 
 VERSION = str(int(time.time()))

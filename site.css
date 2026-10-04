@@ -379,3 +379,52 @@
                 linear-gradient(90deg, var(--ink) 0%, rgba(12, 48, 61, .75) 60%, rgba(12, 48, 61, .4) 100%);
   }
 }
+
+/* =====================================================================
+   Botão flutuante do WhatsApp + pop-up de captação de lead
+   ===================================================================== */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+.wa-float { position: fixed; right: 22px; bottom: 22px; z-index: 500; width: 62px; height: 62px;
+  display: grid; place-items: center; border-radius: 50%; background: #25D366; color: #fff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .35); transition: transform .2s; }
+.wa-float:hover { transform: scale(1.06); }
+.wa-float svg { width: 32px; height: 32px; position: relative; z-index: 1; }
+.wa-float-ping { position: absolute; inset: 0; border-radius: 50%; background: #25D366; opacity: .55;
+  animation: waPing 2.2s cubic-bezier(.3, 0, .2, 1) infinite; }
+@keyframes waPing { 0% { transform: scale(1); opacity: .55; } 75%, 100% { transform: scale(1.9); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .wa-float-ping { animation: none; display: none; } }
+@media (max-width: 760px) { .wa-float { right: 16px; bottom: 16px; width: 56px; height: 56px; } .wa-float svg { width: 28px; height: 28px; } }
+
+.wa-modal { position: fixed; inset: 0; z-index: 600; display: none; }
+.wa-modal.is-open { display: block; }
+.wa-modal-backdrop { position: absolute; inset: 0; background: rgba(5, 15, 20, .6); backdrop-filter: blur(2px); }
+.wa-modal-dialog { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(460px, calc(100vw - 32px));
+  max-height: min(640px, calc(100vh - 32px)); display: flex; flex-direction: column; border-radius: 18px; overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .45); }
+.wa-modal-head { flex: none; padding: 22px 50px 22px 22px; position: relative; background: #075E54; color: #fff; }
+.wa-modal-head h2 { margin: 0; font: 600 19px/1.35 Manrope, sans-serif; letter-spacing: -.01em; }
+.wa-modal-close { position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; border-radius: 50%; border: 0;
+  background: rgba(255, 255, 255, .14); color: #fff; font-size: 20px; line-height: 1; cursor: pointer; }
+.wa-modal-close:hover { background: rgba(255, 255, 255, .24); }
+.wa-modal-body { flex: 1; overflow-y: auto; padding: 26px 22px 22px; display: grid; gap: 14px;
+  background-color: #e7ddcf;
+  background-image: radial-gradient(rgba(12, 48, 61, .05) 1px, transparent 1px);
+  background-size: 22px 22px; }
+.wa-field input { width: 100%; padding: 14px 16px; border: 1px solid #cfc3ad; border-radius: 10px;
+  background: #fff; font: inherit; font-size: 15px; color: #111; }
+.wa-field input:focus { outline: 2px solid #075E54; outline-offset: 1px; }
+.wa-field input.invalid { border-color: #d64545; }
+.wa-robot { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border: 1px solid #cfc3ad;
+  border-radius: 10px; background: #fff; font-size: 15px; color: #222; cursor: pointer; }
+.wa-robot input { width: 18px; height: 18px; accent-color: #075E54; }
+.wa-submit { display: flex; align-items: center; justify-content: center; gap: 10px; border: 0; cursor: pointer;
+  padding: 15px 18px; border-radius: 10px; background: #25D366; color: #fff; font: 600 16px Manrope, sans-serif;
+  letter-spacing: -.01em; }
+.wa-submit svg { width: 20px; height: 20px; }
+.wa-submit:hover { background: #1fb959; }
+.wa-consent { margin: 0; font-size: 12px; line-height: 1.6; color: #52514a; text-align: center; }
+.wa-consent a { color: #075E54; text-decoration: underline; }
+@media (max-width: 480px) { .wa-modal-head { padding: 18px 46px 18px 18px; } .wa-modal-head h2 { font-size: 17px; } .wa-modal-body { padding: 20px 18px 18px; } }
+body.wa-modal-open { overflow: hidden; }

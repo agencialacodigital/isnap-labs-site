@@ -738,6 +738,38 @@ def build_404():
         f.write(layout('/404.html', seo, body))
 
 
+def build_privacy_policy():
+    """Rascunho básico de política de privacidade (LGPD), por causa dos formulários que coletam
+    nome/e-mail/telefone. Revisar com um advogado antes de considerar definitivo."""
+    path = '/politica-de-privacidade/'
+    body = hero('Política de <em>Privacidade</em>', 'Como a iSnap Labs coleta, usa e protege os seus dados.',
+                [(None, 'Política de Privacidade')]) + """
+    <section class="x-section"><div class="container x-prose">
+      <p>Esta política explica como a iSnap Labs coleta, usa e protege os dados pessoais de quem navega
+      pelo site ou entra em contato pelos formulários e pelo WhatsApp.</p>
+      <h2>Quais dados coletamos</h2>
+      <p>Coletamos nome, e-mail e telefone quando você preenche um dos formulários do site, e dados de
+      navegação (como páginas visitadas) por meio de ferramentas de análise, como Google Analytics e Meta Pixel.</p>
+      <h2>Para que usamos esses dados</h2>
+      <p>Usamos os dados para responder ao seu contato, entender como o site é usado e melhorar nosso
+      conteúdo e nossos anúncios. Não vendemos nem compartilhamos seus dados com terceiros fora dessa finalidade.</p>
+      <h2>Seus direitos</h2>
+      <p>De acordo com a Lei Geral de Proteção de Dados (LGPD), você pode solicitar a qualquer momento a
+      confirmação, correção ou exclusão dos seus dados. Para isso, entre em contato pelo e-mail
+      <a href="mailto:%s">%s</a>.</p>
+      <h2>Cookies e ferramentas de terceiros</h2>
+      <p>O site utiliza cookies e ferramentas como Google Analytics, Google Ads e Meta Pixel para medir
+      desempenho e campanhas. Você pode desativar cookies nas configurações do seu navegador.</p>
+      <h2>Alterações nesta política</h2>
+      <p>Esta política pode ser atualizada periodicamente. A data da última atualização consta abaixo.</p>
+      <p><small>Última atualização: outubro de 2026.</small></p>
+    </div></section>
+""" % (EMAIL, EMAIL)
+    seo = head_seo({'title': 'Política de Privacidade - iSnap Labs', 'description': 'Como a iSnap Labs coleta, usa e protege os dados pessoais de quem visita o site.'},
+                   path, 'Política de Privacidade - iSnap Labs')
+    write(path, layout(path, seo, body))
+
+
 def build_sitemap():
     urls = []
     for p in PAGES.values():
@@ -794,6 +826,7 @@ def main():
     for t in TAGS.values():
         build_archive('tag', t)
     build_author()
+    build_privacy_policy()
     build_404()
     build_sitemap()
     core.IMAGES.add('https://isnap.com.br/wp-content/uploads/2023/10/favicon-isnap.png')
