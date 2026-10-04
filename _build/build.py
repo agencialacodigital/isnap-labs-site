@@ -510,20 +510,19 @@ def build_home():
           <p>Estruturamos operações educacionais para experts e infoprodutores que querem transformar autoridade, audiência e conhecimento em um ecossistema de educação mais completo.</p>
           <a href="/faculdade-para-experts/">Conhecer solução <span>↗</span></a>
         </article>
-        <article class="solution-card solution-wide reveal delay-1">
-          <div class="solution-card-head"><span class="solution-tag">Corporativo</span><span class="solution-code">S.04 — S.05</span></div>
-          <div class="wide-copy">
-            <div>
-              <h3>Faculdade In Company</h3>
-              <p>Criamos novas verticais educacionais para empresas que querem transformar sua marca, conhecimento e mercado em uma nova frente de negócio por meio da educação.</p>
-              <a href="/faculdade-in-company/">Conhecer solução <span>↗</span></a>
-            </div>
-            <div>
-              <h3>Universidade Corporativa</h3>
-              <p>Transformamos treinamentos, processos e conhecimento interno em jornadas estruturadas de formação para colaboradores, líderes, parceiros, franqueados ou clientes.</p>
-              <a href="/universidade-corporativa/">Conhecer solução <span>↗</span></a>
-            </div>
-          </div>
+        <article class="solution-card reveal">
+          <div class="solution-card-head"><span class="solution-tag">Corporativo</span><span class="solution-code">S.04</span></div>
+          <div class="metep-word" aria-hidden="true">C</div>
+          <h3>Faculdade In Company</h3>
+          <p>Criamos novas verticais educacionais para empresas que querem transformar sua marca, conhecimento e mercado em uma nova frente de negócio por meio da educação.</p>
+          <a href="/faculdade-in-company/">Conhecer solução <span>↗</span></a>
+        </article>
+        <article class="solution-card reveal delay-1">
+          <div class="solution-card-head"><span class="solution-tag">Formação</span><span class="solution-code">S.05</span></div>
+          <div class="metep-word" aria-hidden="true">U</div>
+          <h3>Universidade Corporativa</h3>
+          <p>Transformamos treinamentos, processos e conhecimento interno em jornadas estruturadas de formação para colaboradores, líderes, parceiros, franqueados ou clientes.</p>
+          <a href="/universidade-corporativa/">Conhecer solução <span>↗</span></a>
         </article>
         <article class="solution-card reveal">
           <div class="solution-card-head"><span class="solution-tag">Estratégia</span><span class="solution-code">S.06</span></div>
