@@ -275,7 +275,7 @@ def header_html(current, home=False):
     return """<a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
   <header class="%s" id="topo">
     <div class="nav-shell">
-      <a class="brand" href="/" aria-label="iSnap Labs, início"><img class="brand-logo" src="/assets/isnap-logo.png" alt="iSnap Labs" width="165" height="40" /></a>
+      <a class="brand" href="/" aria-label="iSnap Labs, início"><img class="brand-logo" src="/assets/isnap-logo.png?v=%s" alt="iSnap Labs" width="165" height="40" /></a>
       <nav class="desktop-nav" aria-label="Navegação principal">%s</nav>
       <a class="nav-cta" href="%s" target="_blank" rel="noopener">Área do cliente <span>↗</span></a>
       <a class="header-button" href="%s" target="_blank" rel="noopener">Falar com especialista</a>
@@ -284,7 +284,7 @@ def header_html(current, home=False):
     <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
       <nav aria-label="Navegação móvel">%s%s<a href="%s" target="_blank" rel="noopener">Área do cliente</a><a href="%s" target="_blank" rel="noopener">Falar com especialista</a></nav>
     </div>
-  </header>""" % (cls, nav_links(current), esc(CLIENT_AREA_URL), esc(WA_URL), nav_links(current, True),
+  </header>""" % (cls, VERSION, nav_links(current), esc(CLIENT_AREA_URL), esc(WA_URL), nav_links(current, True),
                   ''.join('<a class="sub" href="%s">%s</a>' % (h, esc(l)) for h, l in SERVICES), esc(CLIENT_AREA_URL), esc(WA_URL))
 
 
@@ -301,7 +301,7 @@ def footer_html():
   <footer class="site-footer">
     <div class="container footer-top">
       <div>
-        <a class="brand footer-brand" href="/" aria-label="iSnap Labs, voltar ao início"><img class="brand-logo" src="/assets/isnap-logo.png" alt="iSnap Labs" width="165" height="40" loading="lazy" /></a>
+        <a class="brand footer-brand" href="/" aria-label="iSnap Labs, voltar ao início"><img class="brand-logo" src="/assets/isnap-logo.png?v=%s" alt="iSnap Labs" width="165" height="40" loading="lazy" /></a>
         <p class="footer-about">Transformando infoprodutores em empreendedores da educação.</p>
       </div>
       <nav class="footer-nav" aria-label="Rodapé">
@@ -323,7 +323,7 @@ def footer_html():
       <span>© <span id="year">2026</span> iSnap Labs Educação | Grupo Laço Digital</span>
       <a href="#topo">Voltar ao topo ↑</a>
     </div>
-  </footer>""" % (DISCLAIMER,
+  </footer>""" % (DISCLAIMER, VERSION,
                   ''.join('<a href="%s">%s</a>' % (h, esc(l)) for h, l in SERVICES),
                   esc(ADDRESS), phones, EMAIL, EMAIL)
 

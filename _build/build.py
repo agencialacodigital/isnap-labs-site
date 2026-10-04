@@ -457,9 +457,9 @@ def build_home():
 
     # por que se tornar empreendedor da educação (toggles)
     rotation_html = ''.join(
-        '<article class="rotation-card"><div class="portrait-photo"><img src="/%s" alt="%s" width="700" height="700" loading="lazy" /></div>'
+        '<article class="rotation-card"><div class="portrait-photo"><img src="/%s?v=%s" alt="%s" width="700" height="700" loading="lazy" /></div>'
         '<div><small>%s</small><h3>%s</h3></div></article>'
-        % (photo, esc(name), niche, name)
+        % (photo, core.VERSION, esc(name), niche, name)
         for name, niche, photo in EXPERTS * 2)
 
     why_h2 = first('h', 'Por que se tornar', 2)
@@ -477,7 +477,7 @@ def build_home():
     cards = ''.join(post_card(p, featured=(n == 0)) for n, p in enumerate(posts))
 
     body = """    <section class="hero hero-has-banner" aria-labelledby="hero-title">
-      <img class="hero-banner" src="/assets/hero-banner.jpg" alt="Equipe de especialistas trabalhando em conteúdo educacional" width="1536" height="1024" />
+      <img class="hero-banner" src="/assets/hero-banner.jpg?v=%s" alt="Equipe de especialistas trabalhando em conteúdo educacional" width="1536" height="1024" />
       <div class="hero-banner-fade"></div>
       <div class="container hero-layout">
         <div class="hero-copy reveal">
@@ -652,7 +652,7 @@ def build_home():
         </div>
       </div>
     </section>
-""" % (h1, lede, cta_button('Agendar consultoria estratégica'),
+""" % (core.VERSION, h1, lede, cta_button('Agendar consultoria estratégica'),
        about_h2_html, ''.join(paras(about_p, True)), ben_html,
        solutions_note,
        why_intro, cta_button('Quero saber mais'), out_html,
