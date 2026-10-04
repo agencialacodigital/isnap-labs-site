@@ -442,7 +442,7 @@ def build_home():
     cards = ''.join(post_card(p, featured=(n == 0)) for n, p in enumerate(posts))
 
     body = """    <section class="hero hero-has-banner" aria-labelledby="hero-title">
-      <img class="hero-banner" src="/assets/hero-banner.jpg" alt="Infoprodutor comemorando vendas da sua pós-graduação" width="1536" height="1024" />
+      <img class="hero-banner" src="/assets/hero-banner.jpg" alt="Equipe de especialistas trabalhando em conteúdo educacional" width="1536" height="1024" />
       <div class="hero-banner-fade"></div>
       <div class="container hero-layout">
         <div class="hero-copy reveal">
