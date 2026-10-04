@@ -91,18 +91,25 @@ def post_card(p, featured=False, summary=False):
                    ('<p class="x-excerpt">%s</p>' % esc(excerpt(p))) if summary else '')
 
 
-def hero(title, lede='', crumbs=None):
+def hero(title, lede='', crumbs=None, button=None):
+    """button, se dado, é (label, href) e renderiza um botão logo abaixo do lede, reaproveitando .x-actions/.button."""
     crumb = ''
     if crumbs:
         crumb = '<div class="breadcrumb"><a href="/">Início</a>%s</div>' % ''.join(
             '<span>/</span>' + ('<a href="%s">%s</a>' % (h, esc(l)) if h else '<span>%s</span>' % esc(l)) for h, l in crumbs)
+    btn = ''
+    if button:
+        label, href = button
+        ext = ' target="_blank" rel="noopener"' if href.startswith('http') else ''
+        btn = '<div class="x-actions"><a class="button button-primary" href="%s"%s>%s <span>↗</span></a></div>' % (esc(href), ext, esc(label))
     return """    <section class="inner-hero">
       <div class="container">
         %s
         <h1>%s</h1>
         %s
+        %s
       </div>
-    </section>""" % (crumb, title, ('<p>%s</p>' % lede) if lede else '')
+    </section>""" % (crumb, title, ('<p>%s</p>' % lede) if lede else '', btn)
 
 
 def cta_section(title, text='', buttons=None, eyebrow=''):
@@ -359,6 +366,22 @@ BIG_CTA = {
 }
 
 
+# Relança as duas páginas de serviço herdadas do WP para a mesma arquitetura de SEO e
+# linkagem interna das novas páginas de solução, sem tocar no resto do conteúdo delas.
+SOLUTION_SEO_REFRESH = {
+    'pos-graduacao-ou-mba': dict(
+        title='Transforme seu Curso em Pós-Graduação ou MBA | iSnap Labs',
+        description='Transforme cursos, metodologias e conhecimento especializado em projetos estruturados para pós-graduação e MBA com a iSnap Labs.',
+        related=['faculdade-para-experts', 'arquitetura-educacional'],
+    ),
+    'extensao-universitaria': dict(
+        title='Transforme seu Curso Livre em Extensão Universitária | iSnap Labs',
+        description='Estruture seu curso livre para evoluir para uma formação de extensão universitária com apoio da engenharia educacional da iSnap Labs.',
+        related=['faculdade-para-experts', 'arquitetura-educacional'],
+    ),
+}
+
+
 def build_generic(slug, crumbs_label=None, start_tier=0):
     page = PAGES[slug]
     big_cta = slug in BIG_CTA
@@ -370,12 +393,24 @@ def build_generic(slug, crumbs_label=None, start_tier=0):
         body = body.replace(*HEADLINE_H2[slug], 1)
     if slug in BIG_CTA:
         body = body.replace(*BIG_CTA[slug][1], 1)
+    refresh = SOLUTION_SEO_REFRESH.get(slug)
+    if refresh:
+        faq_marker = '</div></div></div></section>\n    <section class="x-section"><div class="container x-split"><div class="x-split-head"><h2>Perguntas Frequentes</h2>'
+        if faq_marker in body:
+            body = body.replace(faq_marker, '</div>%s</div></div></section>\n    <section class="x-section"><div class="container x-split"><div class="x-split-head"><h2>Perguntas Frequentes</h2>'
+                                % svc_related_links(refresh['related']), 1)
+        else:
+            print('AVISO: marcador do FAQ não encontrado em %s, link de soluções relacionadas não inserido' % slug)
     path = page_path(page)
     crumbs = [(None, plain(title) or page['title']['rendered'])]
     if slug in ('pos-graduacao-ou-mba', 'extensao-universitaria', 'consultoria-metep', 'consultoria-mentoria'):
         crumbs = [('/solucoes/', 'Soluções'), (None, plain(title))]
     html_body = hero(title, lede, crumbs) + '\n' + body
-    seo = head_seo(page.get('yoast_head_json'), path, plain(title) + ' - iSnap Labs')
+    yoast = page.get('yoast_head_json')
+    if refresh:
+        yoast = dict(yoast or {}, title=refresh['title'], description=refresh['description'],
+                    og_title=refresh['title'], og_description=refresh['description'])
+    seo = head_seo(yoast, path, plain(title) + ' - iSnap Labs')
     write(path, layout(path, seo, html_body, current='/solucoes/' if slug != 'sobre-nos' else '/sobre-nos/'))
 
 
@@ -751,6 +786,422 @@ def build_404():
         f.write(layout('/404.html', seo, body))
 
 
+# ---------------------------------------------------------------- páginas de serviço "escritas à mão"
+# (sem fonte no WordPress — Faculdade para Experts, Faculdade In Company,
+# Universidade Corporativa, Arquitetura Educacional). Reaproveita a mesma
+# estrutura/tiers/classes das páginas de serviço vindas do WP (ver render_generic).
+
+SOLUTION_TITLES = {
+    'pos-graduacao-ou-mba': 'Pós-Graduação ou MBA',
+    'extensao-universitaria': 'Extensão Universitária',
+    'faculdade-para-experts': 'Faculdade para Experts',
+    'faculdade-in-company': 'Faculdade In Company',
+    'universidade-corporativa': 'Universidade Corporativa',
+    'arquitetura-educacional': 'Arquitetura Educacional',
+}
+
+
+def svc_paras(text):
+    """Quebra um bloco de texto em parágrafos (linha em branco separa parágrafos) -> HTML."""
+    blocks = [p.strip() for p in re.split(r'\n\s*\n', text.strip()) if p.strip()]
+    return ''.join('<p>%s</p>' % esc(' '.join(p.split())) for p in blocks)
+
+
+def svc_related_links(slugs):
+    links = ', '.join('<a href="/%s/">%s</a>' % (s, esc(SOLUTION_TITLES[s])) for s in slugs)
+    return '<p><strong>Conheça outras soluções:</strong> %s.</p>' % links
+
+
+def svc_faq_schema(faq):
+    return {
+        '@type': 'FAQPage',
+        'mainEntity': [
+            {'@type': 'Question', 'name': q,
+             'acceptedAnswer': {'@type': 'Answer', 'text': a}}
+            for q, a in faq
+        ],
+    }
+
+
+def build_service_page(slug, data):
+    path = '/%s/' % slug
+    title = SOLUTION_TITLES[slug]
+
+    benefits3 = ''.join(
+        '<article class="x-card"><span class="x-num">%02d</span><h3>%s</h3><p><strong>%s.</strong> %s</p></article>'
+        % (n + 1, esc(t), esc(d), esc(x))
+        for n, (t, d, x) in enumerate(data['benefits3']))
+
+    benefits6 = ''.join(
+        '<article class="x-card"><h3>%s</h3><p>%s</p></article>' % (esc(t), esc(x))
+        for t, x in data['benefits6'])
+
+    faq_html = ''.join(
+        '<details><summary>%s</summary><div><p>%s</p></div></details>' % (esc(q), esc(a))
+        for q, a in data['faq'])
+
+    related = svc_related_links(data['related'])
+
+    body = hero(esc(data['h1']), esc(data['lede']), [('/solucoes/', 'Soluções'), (None, title)],
+                button=(data['hero_cta'], WA_URL)) + """
+    <section class="x-section x-benefits">
+      <div class="container">
+        <div class="x-prose">%s</div>
+        <div class="x-grid x-grid-3">%s</div>
+      </div>
+    </section>
+    <section class="x-section%s">
+      <div class="container x-split">
+        <div class="x-split-head"><span class="eyebrow"><i></i> %s</span><h2>%s</h2></div>
+        <div class="x-split-body">%s</div>
+      </div>
+    </section>
+    <section class="x-section%s">
+      <div class="container x-split">
+        <div class="x-split-head"><h2>%s</h2></div>
+        <div class="x-split-body">%s<div class="x-grid x-grid-3">%s</div>%s</div>
+      </div>
+    </section>
+    <section class="x-section">
+      <div class="container x-split">
+        <div class="x-split-head"><h2>Perguntas Frequentes</h2></div>
+        <div class="x-split-body"><div class="x-faq">%s</div></div>
+      </div>
+    </section>
+""" % (svc_paras(data['intro']), benefits3,
+       TIER_CLASSES[1], data['section1']['eyebrow'], data['section1']['title'], svc_paras(data['section1']['text']),
+       TIER_CLASSES[2], data['section2']['title'], svc_paras(data['section2']['text']), benefits6, related,
+       faq_html) + cta_section(data['cta_final']['title'], buttons=[(data['cta_final']['button'], WA_URL)])
+
+    schema = {
+        '@context': 'https://schema.org',
+        '@graph': [
+            {
+                '@type': 'Service',
+                'name': title,
+                'description': data['seo_desc'],
+                'provider': {'@type': 'Organization', 'name': 'iSnap Labs', 'url': ORIGIN + '/'},
+                'serviceType': 'Consultoria educacional',
+                'areaServed': 'BR',
+                'url': ORIGIN + path,
+            },
+            {
+                '@type': 'BreadcrumbList',
+                'itemListElement': [
+                    {'@type': 'ListItem', 'position': 1, 'name': 'Início', 'item': ORIGIN + '/'},
+                    {'@type': 'ListItem', 'position': 2, 'name': 'Soluções', 'item': ORIGIN + '/solucoes/'},
+                    {'@type': 'ListItem', 'position': 3, 'name': title, 'item': ORIGIN + path},
+                ],
+            },
+            svc_faq_schema(data['faq']),
+        ],
+    }
+    seo = head_seo({'title': data['seo_title'], 'description': data['seo_desc'], 'og_type': 'website', 'schema': schema},
+                   path, data['seo_title'])
+    write(path, layout(path, seo, body, current='/solucoes/'))
+
+
+NEW_SERVICE_PAGES = {
+    'faculdade-para-experts': dict(
+        h1='Faculdade para Experts',
+        lede='Transforme sua autoridade, sua audiência e seu conhecimento em uma nova operação educacional.',
+        intro="""Você já construiu uma marca. Já possui conhecimento, audiência e, muitas vezes, uma esteira de cursos consolidada.
+
+O próximo passo pode ser maior.
+
+A iSnap Labs estrutura projetos educacionais para experts e infoprodutores que querem expandir seu negócio e construir uma operação de educação conectada à sua própria marca.""",
+        hero_cta='Quero conhecer essa solução',
+        benefits3=[
+            ('Expanda seu portfólio', 'Vá além dos cursos livres',
+             'Amplie as possibilidades da sua marca com um ecossistema que pode reunir cursos livres, extensão, pós-graduação, MBA e outras soluções educacionais compatíveis com o projeto.'),
+            ('Aumente o valor do seu negócio', 'Transforme conhecimento em um ativo educacional',
+             'Uma operação educacional estruturada amplia as possibilidades de monetização, recorrência, posicionamento e relacionamento com sua base de alunos.'),
+            ('Construa algo maior que um curso', 'Crie um ecossistema em torno da sua autoridade',
+             'Sua expertise deixa de estar concentrada em produtos isolados e passa a fazer parte de uma estratégia educacional de longo prazo.'),
+        ],
+        section1=dict(
+            eyebrow='Engenharia Educacional',
+            title='Seu conhecimento pode ser o começo de algo muito maior.',
+            text="""Muitos experts constroem audiências relevantes, desenvolvem metodologias próprias e comercializam cursos durante anos sem perceber que já possuem os principais ativos necessários para construir um negócio educacional muito maior.
+
+A Faculdade para Experts nasce justamente dessa oportunidade.
+
+A iSnap Labs analisa o conhecimento, os produtos, a audiência, o posicionamento e os objetivos do projeto para desenhar uma arquitetura educacional capaz de levar aquela marca para um novo estágio.
+
+O objetivo não é simplesmente adicionar novos cursos ao portfólio.
+
+É construir uma estratégia em que cada nova formação faça sentido dentro de um ecossistema educacional.""",
+        ),
+        section2=dict(
+            title='Você já construiu a autoridade. Agora pode construir a estrutura educacional em torno dela.',
+            text="""Imagine um especialista reconhecido em seu mercado que hoje oferece cursos, treinamentos e formações.
+
+Em vez de continuar criando produtos isolados, essa marca pode evoluir para uma vertical de educação especializada em seu próprio segmento.
+
+Cursos livres podem conviver com extensões, programas de especialização e outras soluções educacionais, formando uma jornada muito maior para o aluno.
+
+É essa transformação que a iSnap Labs ajuda a projetar.""",
+        ),
+        benefits6=[
+            ('Portfólio mais completo', 'Construa uma esteira de produtos educacionais capaz de atender diferentes momentos da jornada do aluno.'),
+            ('Novas fontes de receita', 'Amplie as possibilidades de monetização do conhecimento sem depender exclusivamente de produtos isolados.'),
+            ('Maior LTV', 'Permita que o aluno continue dentro do seu ecossistema por mais tempo, avançando para novas formações.'),
+            ('Fortalecimento da marca', 'Deixe de ser percebido apenas como produtor de cursos e passe a construir uma marca educacional mais sólida.'),
+            ('Expansão de mercado', 'Abra novas possibilidades de atuação dentro do segmento em que sua autoridade já foi construída.'),
+            ('Construção de patrimônio', 'Uma operação educacional organizada pode se tornar um ativo estratégico da sua empresa e da sua marca.'),
+        ],
+        faq=[
+            ('Preciso já ter vários cursos para criar uma operação educacional?',
+             'Não. Cada projeto parte de uma realidade diferente. A iSnap Labs analisa o que já existe e identifica quais caminhos educacionais fazem sentido para o momento da marca.'),
+            ('A iSnap Labs transforma minha empresa em uma faculdade?',
+             'A iSnap Labs atua na estruturação estratégica e educacional do projeto. A oferta de cursos de educação superior ocorre por meio de instituições de ensino devidamente habilitadas e conforme a legislação aplicável.'),
+            ('Posso utilizar minha própria marca?',
+             'A construção da operação pode considerar a identidade, o posicionamento e a marca do expert, respeitando a estrutura jurídica, acadêmica e institucional definida para cada projeto.'),
+            ('Posso aproveitar meus cursos atuais?',
+             'Sim. Um dos primeiros passos é justamente analisar o portfólio existente e identificar quais conteúdos possuem potencial para integrar uma estratégia educacional mais ampla.'),
+            ('Posso oferecer graduação, extensão e pós-graduação?',
+             'As possibilidades dependem do projeto, da área de atuação, da estrutura acadêmica e das instituições parceiras envolvidas.'),
+            ('Como começamos?',
+             'O primeiro passo é entender sua operação atual, seus produtos, sua audiência e onde você deseja chegar. A partir disso, desenhamos as possibilidades educacionais para a sua marca.'),
+        ],
+        cta_final=dict(title='Seu conhecimento já construiu uma audiência. Agora ele pode construir uma empresa de educação.',
+                       button='Falar com um especialista'),
+        related=['pos-graduacao-ou-mba', 'extensao-universitaria', 'arquitetura-educacional'],
+        seo_title='Faculdade para Experts | Transforme Conhecimento em Educação | iSnap Labs',
+        seo_desc='Transforme autoridade, audiência e conhecimento em uma nova operação educacional. A iSnap Labs estrutura projetos para experts e infoprodutores.',
+    ),
+
+    'faculdade-in-company': dict(
+        h1='Faculdade In Company',
+        lede='Transforme sua empresa em uma nova plataforma de educação para o mercado em que ela já atua.',
+        intro="""Sua empresa já possui clientes, marca, distribuição e conhecimento sobre um determinado segmento.
+
+A iSnap Labs ajuda a transformar esses ativos em uma nova vertical de negócio por meio da educação.
+
+Estruturamos projetos para empresas que desejam ampliar sua atuação e criar uma operação educacional conectada ao seu mercado.""",
+        hero_cta='Quero criar uma vertical educacional',
+        benefits3=[
+            ('Nova unidade de negócio', 'Educação como nova fonte de receita',
+             'Crie uma nova frente dentro da sua empresa utilizando uma audiência e um mercado que você já conhece.'),
+            ('Aproveitamento da sua base', 'Transforme clientes em alunos',
+             'Sua empresa já possui relacionamento e distribuição. A educação permite aprofundar essa relação por meio de novas soluções.'),
+            ('Expansão de marca', 'De empresa do segmento para referência na formação do segmento',
+             'Além de vender produtos ou serviços, sua marca passa a participar da formação dos profissionais daquele mercado.'),
+        ],
+        section1=dict(
+            eyebrow='Engenharia Educacional para Empresas',
+            title='Existe uma empresa de educação escondida dentro de muitos negócios.',
+            text="""Uma empresa não precisa nascer no setor educacional para construir uma operação de educação.
+
+Indústrias, empresas de tecnologia, consultorias, redes de serviços, associações e negócios especializados acumulam conhecimento todos os dias.
+
+Conhecem profundamente um mercado.
+
+Possuem especialistas.
+
+Possuem clientes.
+
+Possuem canais de distribuição.
+
+Possuem uma marca reconhecida.
+
+A Faculdade In Company transforma esses ativos em uma nova oportunidade de negócio.
+
+A iSnap Labs estrutura o projeto educacional, analisa as possibilidades de portfólio e organiza a arquitetura necessária para que a empresa possa entrar nesse mercado de forma estratégica.""",
+        ),
+        section2=dict(
+            title='Sua empresa já domina um mercado. Agora pode ajudar a formar quem atua nele.',
+            text="""Uma empresa que atende milhares de profissionais de um determinado setor já conhece as principais dificuldades desse público, entende suas necessidades e possui acesso direto a ele.
+
+Em vez de limitar esse relacionamento à venda do produto ou serviço principal, a empresa pode criar uma vertical de educação.
+
+Uma empresa do agronegócio pode desenvolver uma vertical voltada à formação de profissionais do agro.
+
+Uma empresa de tecnologia pode construir uma operação focada em tecnologia, gestão e inovação.
+
+Uma empresa de saúde pode estruturar um ecossistema de formação profissional dentro da sua especialidade.
+
+A educação passa a ser uma extensão estratégica do negócio.""",
+        ),
+        benefits6=[
+            ('Nova receita', 'Crie uma vertical capaz de gerar faturamento além do produto ou serviço principal.'),
+            ('Fortalecimento do ecossistema', 'Aproxime clientes, profissionais, parceiros e mercado por meio da educação.'),
+            ('Posicionamento', 'A empresa deixa de apenas participar de um segmento e começa a contribuir para a formação das pessoas que trabalham nele.'),
+            ('Maior relacionamento', 'Programas educacionais aumentam os pontos de contato e aprofundam a relação entre marca e público.'),
+            ('Aproveitamento de ativos', 'Transforme conhecimento interno, especialistas, audiência e distribuição em novos produtos educacionais.'),
+            ('Crescimento de longo prazo', 'Construa uma operação que pode evoluir continuamente com novos cursos, formações e programas.'),
+        ],
+        faq=[
+            ('Minha empresa precisa ser do setor educacional para criar uma vertical de educação?',
+             'Não. Empresas de qualquer segmento podem estruturar uma vertical educacional, desde que tenham conhecimento, audiência e um mercado definido para atender.'),
+            ('A iSnap Labs cuida de toda a parte acadêmica e regulatória?',
+             'A iSnap Labs atua na estruturação estratégica e educacional do projeto, em conformidade com a legislação aplicável e em parceria com instituições de ensino devidamente habilitadas, quando necessário.'),
+            ('Posso usar a marca da minha empresa na operação educacional?',
+             'Sim. A construção do projeto considera a identidade e o posicionamento da sua empresa, respeitando a estrutura jurídica e institucional definida para cada caso.'),
+            ('Quanto tempo leva para estruturar uma Faculdade In Company?',
+             'O prazo varia de acordo com a complexidade do projeto, o portfólio já existente e os objetivos da empresa. Isso é definido logo no diagnóstico inicial.'),
+            ('Minha empresa já tem treinamentos internos. Posso aproveitá-los?',
+             'Sim. Um dos primeiros passos é analisar os treinamentos, processos e conteúdos já existentes para identificar o que pode compor a nova vertical educacional.'),
+            ('Como começamos?',
+             'O primeiro passo é entender seu mercado, sua base de clientes e os objetivos da empresa. A partir disso, desenhamos as possibilidades educacionais para o seu negócio.'),
+        ],
+        cta_final=dict(title='Sua empresa já construiu um mercado. Agora pode construir conhecimento dentro dele.',
+                       button='Falar com um especialista'),
+        related=['universidade-corporativa', 'arquitetura-educacional'],
+        seo_title='Faculdade In Company | Crie uma Vertical Educacional | iSnap Labs',
+        seo_desc='Crie uma nova vertical de educação dentro da sua empresa. A iSnap Labs estrutura operações educacionais conectadas à sua marca e mercado.',
+    ),
+
+    'universidade-corporativa': dict(
+        h1='Universidade Corporativa',
+        lede='Transforme o conhecimento da sua empresa em uma estrutura contínua de formação.',
+        intro="""Organize treinamentos, processos, conhecimento técnico e cultura em uma jornada estruturada para colaboradores, parceiros, representantes, clientes ou franqueados.
+
+A iSnap Labs desenvolve a arquitetura educacional para transformar treinamentos dispersos em um verdadeiro ecossistema de desenvolvimento.""",
+        hero_cta='Criar minha Universidade Corporativa',
+        benefits3=[
+            ('Conhecimento organizado', 'Pare de depender de treinamentos isolados',
+             'Transforme conteúdos, processos e experiências internas em trilhas claras de aprendizagem.'),
+            ('Desenvolvimento contínuo', 'Crie jornadas para diferentes perfis',
+             'Estruture formações específicas para colaboradores, líderes, vendedores, parceiros, clientes ou franqueados.'),
+            ('Escala', 'O conhecimento deixa de depender de poucas pessoas',
+             'Documente e organize aquilo que hoje está concentrado nos profissionais mais experientes da empresa.'),
+        ],
+        section1=dict(
+            eyebrow='Engenharia Educacional Corporativa',
+            title='Toda empresa acumula conhecimento. Poucas conseguem transformá-lo em educação.',
+            text="""Ao longo dos anos, empresas desenvolvem processos, métodos, padrões, experiências e conhecimentos que dificilmente estão organizados em uma estrutura de aprendizagem.
+
+Parte desse conhecimento está em documentos.
+
+Parte está em treinamentos.
+
+E uma grande parte está simplesmente na cabeça das pessoas.
+
+A Universidade Corporativa organiza esse patrimônio intelectual.
+
+A iSnap Labs transforma conteúdos e experiências da empresa em jornadas educacionais estruturadas, permitindo que o conhecimento seja transmitido com mais clareza, consistência e escala.""",
+        ),
+        section2=dict(
+            title='Treinamento resolve uma necessidade. Educação corporativa constrói uma cultura.',
+            text="""Existe uma diferença entre realizar treinamentos pontuais e desenvolver uma estratégia educacional.
+
+Uma Universidade Corporativa permite criar trilhas.
+
+O novo colaborador pode percorrer uma jornada de onboarding.
+
+O vendedor pode avançar por níveis de formação comercial.
+
+O gestor pode participar de programas de liderança.
+
+O parceiro pode ser capacitado sobre produtos e processos.
+
+O cliente pode aprender a utilizar melhor aquilo que comprou.
+
+A educação passa a fazer parte da própria estrutura do negócio.""",
+        ),
+        benefits6=[
+            ('Onboarding estruturado', 'Crie jornadas para acelerar a integração de novos colaboradores.'),
+            ('Formação de lideranças', 'Desenvolva programas contínuos para gestores e futuros líderes.'),
+            ('Capacitação comercial', 'Organize metodologias, processos e melhores práticas de vendas em trilhas de aprendizagem.'),
+            ('Formação de parceiros', 'Padronize conhecimento entre representantes, distribuidores, prestadores ou franqueados.'),
+            ('Educação de clientes', 'Utilize conteúdo como ferramenta para aumentar adoção, relacionamento e percepção de valor.'),
+            ('Preservação do conhecimento', 'Transforme experiência interna em patrimônio intelectual documentado e replicável.'),
+        ],
+        faq=[
+            ('Universidade Corporativa é a mesma coisa que treinamento?',
+             'Não. Treinamentos pontuais resolvem necessidades específicas. Uma Universidade Corporativa organiza esse conhecimento em trilhas contínuas de aprendizagem, para diferentes públicos e objetivos.'),
+            ('Minha empresa precisa ter uma equipe grande para criar uma Universidade Corporativa?',
+             'Não. O formato se adapta ao tamanho e à realidade de cada empresa, desde operações menores até grandes estruturas com milhares de colaboradores.'),
+            ('A Universidade Corporativa serve só para colaboradores?',
+             'Não necessariamente. As trilhas podem ser desenhadas para colaboradores, líderes, vendedores, parceiros, franqueados ou clientes, de acordo com os objetivos do projeto.'),
+            ('Podemos usar o conteúdo que já temos, como treinamentos e manuais?',
+             'Sim. Grande parte do trabalho inicial é justamente organizar e transformar esse conteúdo já existente em trilhas estruturadas de aprendizagem.'),
+            ('A plataforma de ensino está incluída?',
+             'A iSnap Labs atua na estruturação pedagógica e educacional do projeto. A definição da tecnologia e da plataforma é tratada de acordo com as necessidades específicas de cada empresa.'),
+            ('Como começamos?',
+             'O primeiro passo é mapear o conhecimento, os processos e os públicos que a empresa deseja formar. A partir disso, desenhamos a arquitetura da sua Universidade Corporativa.'),
+        ],
+        cta_final=dict(title='Transforme o conhecimento da sua empresa em um patrimônio que pode ser ensinado, replicado e escalado.',
+                       button='Falar com um especialista'),
+        related=['faculdade-in-company', 'arquitetura-educacional'],
+        seo_title='Universidade Corporativa | Educação para Empresas | iSnap Labs',
+        seo_desc='Estruture trilhas de aprendizagem, treinamentos e desenvolvimento contínuo para colaboradores, parceiros e clientes com a iSnap Labs.',
+    ),
+
+    'arquitetura-educacional': dict(
+        h1='Arquitetura Educacional',
+        lede='Descubra até onde o seu conhecimento pode chegar.',
+        intro="""Analisamos seus produtos, sua audiência, sua marca e seu modelo de negócio para desenhar uma estratégia de expansão educacional.
+
+A partir disso, estruturamos uma jornada que pode conectar cursos livres, extensão, pós-graduação, MBA e novas oportunidades de formação.""",
+        hero_cta='Quero desenhar minha estratégia educacional',
+        benefits3=[
+            ('Visão estratégica', 'Entenda o potencial educacional do seu negócio',
+             'Mapeie possibilidades que hoje podem estar escondidas dentro do seu portfólio e da sua audiência.'),
+            ('Portfólio conectado', 'Pare de criar produtos isolados',
+             'Construa uma esteira em que cada formação tenha um papel claro na jornada do aluno.'),
+            ('Expansão planejada', 'Cresça com direção',
+             'Defina quais produtos, níveis de formação e novas frentes educacionais fazem sentido para o seu negócio.'),
+        ],
+        section1=dict(
+            eyebrow='Engenharia Educacional',
+            title='Nem sempre o problema é falta de conhecimento. Muitas vezes, falta arquitetura.',
+            text="""Muitos experts e empresas já possuem conhecimento, cursos, treinamentos, autoridade e audiência.
+
+O problema é que esses ativos foram construídos ao longo do tempo de maneira isolada.
+
+Um curso não conversa com o próximo.
+
+Uma formação não leva naturalmente a outra.
+
+Não existe uma jornada clara de crescimento para o aluno.
+
+A Arquitetura Educacional organiza esse cenário.
+
+A iSnap Labs analisa o que já existe, identifica oportunidades e desenha um mapa de expansão capaz de transformar produtos isolados em um ecossistema educacional.""",
+        ),
+        section2=dict(
+            title='Antes de criar o próximo curso, entenda qual deve ser o próximo passo.',
+            text="""Nem toda oportunidade precisa virar um novo produto.
+
+A estratégia começa entendendo o momento do negócio, a maturidade da audiência, os ativos disponíveis e o potencial de expansão.
+
+A partir desse diagnóstico, é possível definir caminhos mais inteligentes para o crescimento educacional.
+
+O resultado é uma operação mais organizada, coerente e preparada para crescer.""",
+        ),
+        benefits6=[
+            ('Diagnóstico educacional', 'Entenda o estágio atual da sua operação.'),
+            ('Mapeamento de oportunidades', 'Identifique novas possibilidades de produtos, formações e modelos educacionais.'),
+            ('Organização do portfólio', 'Estruture uma jornada clara entre diferentes produtos.'),
+            ('Maior LTV', 'Crie caminhos para que o aluno continue avançando dentro do ecossistema.'),
+            ('Posicionamento mais forte', 'Construa uma marca percebida como referência em educação dentro do seu mercado.'),
+            ('Plano de expansão', 'Defina prioridades e próximos passos antes de investir em novos produtos.'),
+        ],
+        faq=[
+            ('A Arquitetura Educacional serve para quem ainda não tem nenhum curso?',
+             'Sim. O diagnóstico pode partir de qualquer estágio, desde quem ainda não lançou nenhum produto até quem já tem um portfólio consolidado e quer organizar os próximos passos.'),
+            ('Esse serviço já inclui a criação dos cursos?',
+             'A Arquitetura Educacional é a etapa de diagnóstico e planejamento. A partir do mapa de expansão definido, os próximos passos podem incluir outras soluções da iSnap Labs, de acordo com o que fizer sentido para o projeto.'),
+            ('Quanto tempo leva esse diagnóstico?',
+             'O prazo varia de acordo com a complexidade do portfólio e da audiência analisados. Isso é alinhado logo no início do projeto.'),
+            ('Esse serviço é só para experts e infoprodutores?',
+             'Não. A Arquitetura Educacional também atende empresas que desejam entender o potencial educacional do seu negócio antes de investir em novos produtos.'),
+            ('Ao final, eu recebo um plano de ação?',
+             'Sim. O resultado do diagnóstico é um mapa de expansão com os caminhos e as prioridades educacionais recomendadas para o seu momento.'),
+            ('Como começamos?',
+             'O primeiro passo é entender seus produtos, sua audiência e seu modelo de negócio atual. A partir disso, desenhamos a estratégia de expansão educacional.'),
+        ],
+        cta_final=dict(title='Seu conhecimento já existe. Agora ele precisa de uma arquitetura para crescer.',
+                       button='Falar com um especialista'),
+        related=['pos-graduacao-ou-mba', 'extensao-universitaria', 'faculdade-para-experts', 'faculdade-in-company', 'universidade-corporativa'],
+        seo_title='Arquitetura Educacional para Experts e Empresas | iSnap Labs',
+        seo_desc='Organize seus produtos, conhecimento e audiência em uma estratégia de expansão educacional com a engenharia educacional da iSnap Labs.',
+    ),
+}
+
+
 def build_privacy_policy():
     """Rascunho básico de política de privacidade (LGPD), por causa dos formulários que coletam
     nome/e-mail/telefone. Revisar com um advogado antes de considerar definitivo."""
@@ -793,6 +1244,9 @@ def build_sitemap():
         urls.append(('%s/category/%s/' % (ORIGIN, c['slug']), max(p['modified'] for p in POSTS)[:10], '0.4'))
     for t in TAGS.values():
         urls.append(('%s/tag/%s/' % (ORIGIN, t['slug']), max(p['modified'] for p in POSTS)[:10], '0.3'))
+    today = __import__('datetime').date.today().isoformat()
+    for slug in NEW_SERVICE_PAGES:
+        urls.append(('%s/%s/' % (ORIGIN, slug), today, '0.8'))
     x = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for u, d, pr in urls:
         x.append('  <url><loc>%s</loc><lastmod>%s</lastmod><priority>%s</priority></url>' % (u, d, pr))
@@ -830,6 +1284,8 @@ def main():
                  'consultoria-metep', 'consultoria-mentoria'):
         build_generic(slug)
     build_generic('solucoes', start_tier=2)  # página com um único bloco: abre em cinza-claro, não em azul
+    for slug, data in NEW_SERVICE_PAGES.items():
+        build_service_page(slug, data)
     build_contact()
     build_blog()
     for p in POSTS:
