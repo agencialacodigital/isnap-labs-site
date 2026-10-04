@@ -489,8 +489,8 @@ def build_home():
           <div class="solution-card-head"><span class="solution-tag">Estruturação acadêmica</span><span class="solution-code">S.01</span></div>
           <div class="solution-main">
             <div>
-              <h3>Pós-Graduação ou MBA</h3>
-              <p>A iSnap Labs oferece serviços de consultoria especializada para transformar infoprodutos em metodologias de ensino.</p>
+              <h3>Pós-Graduação e MBA</h3>
+              <p>Transformamos metodologias, cursos e conhecimentos especializados em projetos educacionais estruturados para pós-graduação e MBA, em parceria com instituições de ensino.</p>
               <a href="/pos-graduacao-ou-mba/">Conhecer solução <span>↗</span></a>
             </div>
             <div class="degree-visual" aria-hidden="true"><div class="degree-ring"><span>MBA</span></div><div class="degree-line"></div></div>
@@ -500,23 +500,37 @@ def build_home():
           <div class="solution-card-head"><span class="solution-tag">Validação</span><span class="solution-code">S.02</span></div>
           <div class="solution-mini-icon" aria-hidden="true"><span>✓</span></div>
           <h3>Extensão Universitária</h3>
-          <p>Apoio na modelagem de cursos compatíveis com as normas educacionais legais, para produtos de baixa carga horária.</p>
+          <p>Estruturamos cursos livres para que possam evoluir para formações de extensão universitária, agregando valor acadêmico e fortalecendo o produto educacional.</p>
           <a href="/extensao-universitaria/">Conhecer solução <span>↗</span></a>
         </article>
         <article class="solution-card reveal">
-          <div class="solution-card-head"><span class="solution-tag">Estratégia</span><span class="solution-code">S.03</span></div>
-          <div class="metep-word" aria-hidden="true">M</div>
-          <h3>Consultoria METEP</h3>
-          <p>Método Estratégico de Transformação e Performance para transformar infoprodutores em empreendedores da educação.</p>
-          <a href="/consultoria-metep/">Conhecer solução <span>↗</span></a>
+          <div class="solution-card-head"><span class="solution-tag">Experts</span><span class="solution-code">S.03</span></div>
+          <div class="metep-word" aria-hidden="true">E</div>
+          <h3>Faculdade para Experts</h3>
+          <p>Estruturamos operações educacionais para experts e infoprodutores que querem transformar autoridade, audiência e conhecimento em um ecossistema de educação mais completo.</p>
+          <a href="/faculdade-para-experts/">Conhecer solução <span>↗</span></a>
         </article>
         <article class="solution-card solution-wide reveal delay-1">
-          <div class="solution-card-head"><span class="solution-tag">Crescimento</span><span class="solution-code">S.04 — S.05</span></div>
+          <div class="solution-card-head"><span class="solution-tag">Corporativo</span><span class="solution-code">S.04 — S.05</span></div>
           <div class="wide-copy">
-            <div><h3>Consultoria / Mentoria para Lançamentos e Vendas</h3><p>Consultoria projetada para ajudar infoprodutores a maximizar o sucesso de seus cursos e produtos educacionais.</p></div>
-            <div><h3>Cursos Rápidos para Infoprodutores</h3><p>Cursos rápidos que ajudam a enfrentar as principais dificuldades do mercado de infoprodutos.</p></div>
+            <div>
+              <h3>Faculdade In Company</h3>
+              <p>Criamos novas verticais educacionais para empresas que querem transformar sua marca, conhecimento e mercado em uma nova frente de negócio por meio da educação.</p>
+              <a href="/faculdade-in-company/">Conhecer solução <span>↗</span></a>
+            </div>
+            <div>
+              <h3>Universidade Corporativa</h3>
+              <p>Transformamos treinamentos, processos e conhecimento interno em jornadas estruturadas de formação para colaboradores, líderes, parceiros, franqueados ou clientes.</p>
+              <a href="/universidade-corporativa/">Conhecer solução <span>↗</span></a>
+            </div>
           </div>
-          <a class="wide-link" href="/consultoria-mentoria/">Explorar consultoria <span>↗</span></a>
+        </article>
+        <article class="solution-card reveal">
+          <div class="solution-card-head"><span class="solution-tag">Estratégia</span><span class="solution-code">S.06</span></div>
+          <div class="metep-word" aria-hidden="true">A</div>
+          <h3>Arquitetura Educacional</h3>
+          <p>Analisamos produtos, audiência e modelo de negócio para desenhar uma estratégia de expansão conectando cursos livres, extensão, pós-graduação e novas oportunidades educacionais.</p>
+          <a href="/arquitetura-educacional/">Conhecer solução <span>↗</span></a>
         </article>
       </div>
       <div class="container x-note reveal"><div>%s<p><a class="arrow-link" href="/solucoes/">Ver todas as soluções <span>→</span></a></p></div></div>
