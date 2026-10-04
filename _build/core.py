@@ -253,7 +253,8 @@ TRACKING = """<script async src="https://www.googletagmanager.com/gtag/js?id=G-L
 
 NAV = [('/', 'Início'), ('/sobre-nos/', 'Sobre nós'), ('/solucoes/', 'Soluções'), ('/blog/', 'Blog'), ('/contato/', 'Contato')]
 SERVICES = [('/pos-graduacao-ou-mba/', 'Pós-Graduação ou MBA'), ('/extensao-universitaria/', 'Extensão Universitária'),
-            ('/consultoria-metep/', 'Consultoria METEP'), ('/consultoria-mentoria/', 'Consultoria Educacional')]
+            ('/faculdade-para-experts/', 'Faculdade para Experts'), ('/faculdade-in-company/', 'Faculdade In Company'),
+            ('/universidade-corporativa/', 'Universidade Corporativa'), ('/arquitetura-educacional/', 'Arquitetura Educacional')]
 
 
 def nav_links(current, mobile=False):
