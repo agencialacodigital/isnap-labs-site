@@ -46,6 +46,25 @@
   var year = document.getElementById('year');
   if (year) year.textContent = new Date().getFullYear();
 
+  // Máscara de telefone (44) 99999-9999 em todos os campos de telefone do site
+  function maskPhone(value) {
+    var d = value.replace(/\D/g, '').slice(0, 11);
+    if (d.length > 10) return d.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3').trim().replace(/-$/, '');
+    if (d.length > 6) return d.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3').trim().replace(/-$/, '');
+    if (d.length > 2) return d.replace(/(\d{2})(\d{0,5})/, '($1) $2').trim();
+    if (d.length > 0) return d.replace(/(\d{0,2})/, '($1');
+    return d;
+  }
+  document.querySelectorAll('input[type="tel"]').forEach(function (input) {
+    input.setAttribute('maxlength', '15');
+    input.setAttribute('inputmode', 'numeric');
+    input.addEventListener('input', function () {
+      var pos = input.value.length - input.selectionStart;
+      input.value = maskPhone(input.value);
+      input.selectionStart = input.selectionEnd = Math.max(input.value.length - pos, 0);
+    });
+  });
+
   // Formulário de contato: monta a mensagem e abre o WhatsApp da iSnap Labs
   var form = document.getElementById('contact-form');
   if (form) {
