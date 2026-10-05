@@ -25,6 +25,12 @@ DECOR_NAMES = ('traco', 'carraca', 'assinale-dentro', 'foguete', 'conselheiro-fi
                'curso-online', 'certificado-digital', '/curso.png', 'elementor/thumbs', 'ai2-contact-pic')
 
 
+# Alt text para imagens do WordPress que chegaram sem (auditoria de SEO/acessibilidade —
+# só preenche o que estava vazio, não troca alt que já existia).
+IMAGE_ALT_OVERRIDES = {
+    'foto-william': 'William Teixeira, CEO da iSnap Labs',
+}
+
 # Textos que faltavam no site original (fornecidos pela iSnap)
 BENEFIT_TEXT = {
     'Vantagem competitiva para Programas e Cursos': 'Infoprodutores que transformam seus cursos em programas acadêmicos reconhecidos ganham uma vantagem competitiva única, destacando-se no mercado.',
@@ -79,8 +85,9 @@ def excerpt(p, n=28):
 
 def post_card(p, featured=False, summary=False):
     src, w, h, alt = thumb(p)
+    title_plain = html.unescape(p['title']['rendered'])
     cats = [CATS[c]['name'] for c in p['categories'] if c in CATS and CATS[c]['slug'] != 'uncategorized']
-    img = ('<img src="%s" alt="%s" width="%s" height="%s" loading="lazy" />' % (src, esc(alt), w, h)) if src else ''
+    img = ('<img src="%s" alt="%s" width="%s" height="%s" loading="lazy" />' % (src, esc(alt or title_plain), w, h)) if src else ''
     return """<a class="article-card%s reveal" href="/%s/">
           <div class="article-art has-img">%s</div>
           <div class="article-meta"><span>%s</span><time datetime="%s">%s</time></div>
@@ -314,8 +321,9 @@ def render_generic(page, start_tier=0, big_cta=False, cta_text=''):
             imgs = []
             while i < n and B[i]['kind'] == 'img':
                 m = B[i]
+                fallback_alt = next((a for pat, a in IMAGE_ALT_OVERRIDES.items() if pat in m['src']), plain(title))
                 imgs.append('<img src="%s" alt="%s" width="%s" height="%s" loading="lazy" />'
-                            % (upload_path(m['src']), esc(m['alt']), m['width'] or '', m['height'] or ''))
+                            % (upload_path(m['src']), esc(m['alt'] or fallback_alt), m['width'] or '', m['height'] or ''))
                 i += 1
             sec.append('<figure class="x-figure x-figure-%d">%s</figure>' % (len(imgs), ''.join(imgs)))
             continue
@@ -382,6 +390,21 @@ SOLUTION_SEO_REFRESH = {
 }
 
 
+def extract_faq_schema_from_body(body_html):
+    """Lê o FAQ já renderizado (<summary>/<p>) e devolve um FAQPage schema que reflete
+    exatamente o que está visível na página — sem inventar nem alterar nenhum texto."""
+    pairs = re.findall(r'<summary>(.*?)</summary><div>(.*?)</div></details>', body_html, re.S)
+    if not pairs:
+        return None
+    faq = []
+    for q, a_html in pairs:
+        q_plain = plain(q)
+        a_plain = ' '.join(plain(p) for p in re.findall(r'<p>(.*?)</p>', a_html, re.S)) or plain(a_html)
+        if q_plain and a_plain:
+            faq.append((q_plain, a_plain))
+    return svc_faq_schema(faq) if faq else None
+
+
 def build_generic(slug, crumbs_label=None, start_tier=0):
     page = PAGES[slug]
     big_cta = slug in BIG_CTA
@@ -410,6 +433,11 @@ def build_generic(slug, crumbs_label=None, start_tier=0):
     if refresh:
         yoast = dict(yoast or {}, title=refresh['title'], description=refresh['description'],
                     og_title=refresh['title'], og_description=refresh['description'])
+    # Auditoria de SEO: adiciona FAQPage schema às páginas que já têm FAQ visível mas não
+    # tinham o schema correspondente — só soma, não troca nada do schema já existente.
+    faq_schema = extract_faq_schema_from_body(html_body)
+    if faq_schema and yoast and yoast.get('schema', {}).get('@graph'):
+        yoast = dict(yoast, schema=dict(yoast['schema'], **{'@graph': yoast['schema']['@graph'] + [faq_schema]}))
     seo = head_seo(yoast, path, plain(title) + ' - iSnap Labs')
     write(path, layout(path, seo, html_body, current='/solucoes/' if slug != 'sobre-nos' else '/sobre-nos/'))
 
@@ -893,6 +921,13 @@ def build_service_page(slug, data):
                     {'@type': 'ListItem', 'position': 3, 'name': title, 'item': ORIGIN + path},
                 ],
             },
+            {
+                '@type': 'Organization',
+                'name': 'iSnap Labs',
+                'url': ORIGIN + '/',
+                'logo': ORIGIN + '/assets/isnap-logo.png',
+                'sameAs': ['https://www.instagram.com/isnaplabs/', 'https://br.linkedin.com/company/isnaplabs'],
+            },
             svc_faq_schema(data['faq']),
         ],
     }
@@ -1247,6 +1282,7 @@ def build_sitemap():
     today = __import__('datetime').date.today().isoformat()
     for slug in NEW_SERVICE_PAGES:
         urls.append(('%s/%s/' % (ORIGIN, slug), today, '0.8'))
+    urls.append(('%s/politica-de-privacidade/' % ORIGIN, today, '0.3'))
     x = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for u, d, pr in urls:
         x.append('  <url><loc>%s</loc><lastmod>%s</lastmod><priority>%s</priority></url>' % (u, d, pr))
