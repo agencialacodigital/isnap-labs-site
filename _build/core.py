@@ -198,6 +198,32 @@ def plain(h):
     return re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', '', h or '')).strip()
 
 
+# Auditoria de SEO: a Organization/WebSite herdada do WordPress tinha o nome preso ao
+# posicionamento antigo ("...Pós Graduação ou MBA") e o logo apontando para um arquivo que
+# não existe mais no site novo. Corrige só esses 3 campos; o resto do schema (datas, autor,
+# breadcrumb, sameAs etc.) fica exatamente como veio do WordPress.
+STALE_ORG_NAME = 'iSnap Labs - Transformando Infoprodutos em Pós Graduação ou MBA'
+STALE_SITE_DESC = 'Transformando Infoprodutores em Empreendedores da Educação'
+CURRENT_TAGLINE = ('Engenharia educacional para experts, infoprodutores e empresas que querem '
+                    'transformar conhecimento em produtos educacionais de maior valor.')
+
+
+def fix_stale_org_schema(graph):
+    for node in graph:
+        t = node.get('@type')
+        if t in ('Organization', 'WebSite') and node.get('name') == STALE_ORG_NAME:
+            node['name'] = 'iSnap Labs'
+        if t == 'WebSite' and html.unescape(node.get('description', '')).strip() == STALE_SITE_DESC:
+            node['description'] = CURRENT_TAGLINE
+        if t == 'Organization':
+            logo = node.get('logo')
+            if isinstance(logo, dict) and 'logo-isnap-site.png' in (logo.get('url') or ''):
+                logo['url'] = logo['contentUrl'] = ORIGIN + '/assets/isnap-logo.png'
+                logo['width'], logo['height'] = 660, 220
+                logo['caption'] = 'iSnap Labs'
+    return graph
+
+
 # ---------------------------------------------------------------- SEO / layout
 def head_seo(y, path, fallback_title, fallback_desc=''):
     """Monta as tags <title>/<meta>/JSON-LD a partir dos metadados do Yoast."""
@@ -232,6 +258,8 @@ def head_seo(y, path, fallback_title, fallback_desc=''):
         out.append('<meta property="%s" content="%s">' % (k, esc(v)))
     out.append('<meta name="twitter:card" content="%s">' % esc(y.get('twitter_card') or 'summary_large_image'))
     if y.get('schema'):
+        if isinstance(y['schema'].get('@graph'), list):
+            fix_stale_org_schema(y['schema']['@graph'])
         ld = json.dumps(y['schema'], ensure_ascii=False).replace('(44) 3037-6030 ', '').replace('(44) 3037-6030', '')
         out.append('<script type="application/ld+json">%s</script>' % ld)
     return '\n  '.join(out)

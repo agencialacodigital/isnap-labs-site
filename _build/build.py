@@ -791,7 +791,14 @@ def build_archive(kind, term):
     <section class="x-section"><div class="container"><div class="x-post-grid">%s</div></div></section>
 """ % ''.join(post_card(p, summary=True) for p in posts)
     d = 'Artigos sobre %s no blog da iSnap Labs: conteúdos para infoprodutores e empreendedores da educação.' % name
-    seo = head_seo(dict(term.get('yoast_head_json') or {}, description=d, og_description=d), path, '%s: %s - iSnap Labs' % (label, name))
+    # Auditoria de SEO: "Sem categoria" e as tags (1 post cada, mesmo conteúdo já indexado por
+    # categoria) são páginas finas/duplicadas — noindex em vez de excluir (continuam no ar e
+    # com o link de volta pro blog funcionando, só não competem no índice do Google).
+    thin = kind == 'tag' or slug == 'uncategorized'
+    seo_data = dict(term.get('yoast_head_json') or {}, description=d, og_description=d)
+    if thin:
+        seo_data['robots'] = {'index': 'noindex'}
+    seo = head_seo(seo_data, path, '%s: %s - iSnap Labs' % (label, name))
     write(path, layout(path, seo, body, current='/blog/'))
 
 
@@ -801,7 +808,9 @@ def build_author():
     <section class="x-section"><div class="container"><div class="x-post-grid">%s</div></div></section>
 """ % ''.join(post_card(p, summary=True) for p in POSTS)
     d = 'Todos os artigos publicados pela iSnap Labs sobre infoprodutos, certificação e educação.'
-    seo = head_seo({'description': d, 'og_description': d}, path, 'Artigos de iSnap Labs - iSnap Labs')
+    # Auditoria de SEO: arquivo de autor único (todo mundo é "iSnap Labs") duplica a listagem
+    # do /blog/ sem nenhum conteúdo próprio — noindex, mas continua acessível.
+    seo = head_seo({'description': d, 'og_description': d, 'robots': {'index': 'noindex'}}, path, 'Artigos de iSnap Labs - iSnap Labs')
     write(path, layout(path, seo, body, current='/blog/'))
 
 
@@ -1275,10 +1284,11 @@ def build_sitemap():
         urls.append((ORIGIN + page_path(p), p['modified'][:10], '1.0' if p['slug'] == 'home' else '0.8'))
     for p in POSTS:
         urls.append(('%s/%s/' % (ORIGIN, p['slug']), p['modified'][:10], '0.7'))
+    # Auditoria de SEO: "uncategorized" e as tags levaram noindex (páginas finas/duplicadas),
+    # então saem do sitemap também — sitemap lista só o que se quer indexado.
     for c in CATS.values():
-        urls.append(('%s/category/%s/' % (ORIGIN, c['slug']), max(p['modified'] for p in POSTS)[:10], '0.4'))
-    for t in TAGS.values():
-        urls.append(('%s/tag/%s/' % (ORIGIN, t['slug']), max(p['modified'] for p in POSTS)[:10], '0.3'))
+        if c['slug'] != 'uncategorized':
+            urls.append(('%s/category/%s/' % (ORIGIN, c['slug']), max(p['modified'] for p in POSTS)[:10], '0.4'))
     today = __import__('datetime').date.today().isoformat()
     for slug in NEW_SERVICE_PAGES:
         urls.append(('%s/%s/' % (ORIGIN, slug), today, '0.8'))
