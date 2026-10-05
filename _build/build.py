@@ -689,6 +689,12 @@ def build_home():
     write('/', layout('/', seo, body, current='/', home=True))
 
 
+# Script de captação de leads do CRM (carrega de forma assíncrona via Supabase Edge
+# Function; não altera o comportamento atual do formulário, que continua abrindo o
+# WhatsApp — isso roda em paralelo, assim que a página carrega).
+CRM_LEAD_CAPTURE_SCRIPT = """<script>!function(){var k="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tbnB2cml4ZHF0c2R6bWxyY2xqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5ODkzMTcsImV4cCI6MjA5NDU2NTMxN30.cYOoc_iillMB-2RuJSj7H5SG5KAw2QmB8Rj6YfmL9S8",u="https://omnpvrixdqtsdzmlrclj.supabase.co/functions/v1/leadcapture-script/ffba4a5f-da30-48d0-ad38-5d697f1b5db9/81b11be8-6071-4925-a87a-03dbddbbb1b2";var x=new XMLHttpRequest;x.open("GET",u,!0),x.setRequestHeader("apikey",k),x.onload=function(){if(200===x.status){var s=document.createElement("script");s.textContent=x.responseText;(document.head||document.body).appendChild(s)}};x.send()}();</script>"""
+
+
 # ---------------------------------------------------------------- contato
 def build_contact():
     page = PAGES['contato']
@@ -717,7 +723,7 @@ def build_contact():
       </div>
     </section>""" % (esc(ADDRESS), phones, EMAIL, EMAIL, esc(core.WA_URL), WHATSAPP)
     seo = head_seo(dict(page.get('yoast_head_json') or {}, description='Fale com a iSnap Labs, em Maringá/PR: WhatsApp (44) 99992-2804 ou e-mail %s. Agende uma consultoria estratégica.' % EMAIL, og_description='Fale com a iSnap Labs, em Maringá/PR: WhatsApp (44) 99992-2804 ou e-mail %s. Agende uma consultoria estratégica.' % EMAIL), path, 'Contato - iSnap Labs')
-    write(path, layout(path, seo, body, current='/contato/'))
+    write(path, layout(path, seo, body, current='/contato/', extra_scripts=CRM_LEAD_CAPTURE_SCRIPT))
 
 
 # ---------------------------------------------------------------- blog / posts / taxonomias

@@ -386,7 +386,7 @@ def whatsapp_widget_html():
   """ % (esc(WA_POPUP_URL), WA_ICON, WA_ICON)
 
 
-def layout(path, seo, body, current=None, home=False):
+def layout(path, seo, body, current=None, home=False, extra_scripts=''):
     return """<!doctype html>
 <html lang="pt-BR">
 <head>
@@ -412,10 +412,11 @@ def layout(path, seo, body, current=None, home=False):
 
   %s
   <script src="/site.js?v=%s"></script>
+  %s
 </body>
 </html>
 """ % (seo, VERSION, VERSION, TRACKING, 'home-page' if home else 'inner-page', header_html(current, home), body, footer_html(),
-       whatsapp_widget_html(), VERSION)
+       whatsapp_widget_html(), VERSION, extra_scripts)
 
 
 VERSION = str(int(time.time()))
