@@ -16,6 +16,11 @@ WA_URL = 'https://api.whatsapp.com/send?phone=%s&text=%s' % (WHATSAPP, WA_TEXT.r
 WA_POPUP_TEXT = 'Olá, estou vindo do site da iSnap Labs e gostaria de mais informações.'
 WA_POPUP_URL = 'https://api.whatsapp.com/send?phone=%s&text=%s' % (WHATSAPP, WA_POPUP_TEXT.replace(' ', '%20'))
 EMAIL = 'voe@isnap.com.br'
+
+# Script de captação de leads do CRM para o pop-up de WhatsApp (presente em todas as
+# páginas via whatsapp_widget_html). Carrega de forma assíncrona e não altera o
+# comportamento do formulário, que continua abrindo o WhatsApp normalmente.
+WA_LEAD_CAPTURE_SCRIPT = """<script>!function(){var k="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tbnB2cml4ZHF0c2R6bWxyY2xqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5ODkzMTcsImV4cCI6MjA5NDU2NTMxN30.cYOoc_iillMB-2RuJSj7H5SG5KAw2QmB8Rj6YfmL9S8",u="https://omnpvrixdqtsdzmlrclj.supabase.co/functions/v1/leadcapture-script/ffba4a5f-da30-48d0-ad38-5d697f1b5db9/4fe09358-b15d-41b3-b5c4-9bcbf1e7acfd";var x=new XMLHttpRequest;x.open("GET",u,!0),x.setRequestHeader("apikey",k),x.onload=function(){if(200===x.status){var s=document.createElement("script");s.textContent=x.responseText;(document.head||document.body).appendChild(s)}};x.send()}();</script>"""
 CLIENT_AREA_URL = 'https://app.isnap.com.br/'
 ADDRESS = 'Av. Advogado Horácio Raccanello Filho, 5570 – Zona 07, Maringá / PR – CEP 87020-035'
 PHONES = [('(44) 99992-2804', '+5544999922804')]
@@ -413,10 +418,11 @@ def layout(path, seo, body, current=None, home=False, extra_scripts=''):
   %s
   <script src="/site.js?v=%s"></script>
   %s
+  %s
 </body>
 </html>
 """ % (seo, VERSION, VERSION, TRACKING, 'home-page' if home else 'inner-page', header_html(current, home), body, footer_html(),
-       whatsapp_widget_html(), VERSION, extra_scripts)
+       whatsapp_widget_html(), VERSION, WA_LEAD_CAPTURE_SCRIPT, extra_scripts)
 
 
 VERSION = str(int(time.time()))
