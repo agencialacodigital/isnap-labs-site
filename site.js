@@ -149,4 +149,64 @@
       closeWaModal();
     });
   }
+
+  // Pop-up de orçamento: qualquer outro botão/link que levaria direto ao WhatsApp
+  // (hero, cards de solução, CTAs de página, cabeçalho, rodapé etc.) abre este
+  // pop-up primeiro, pede nome/e-mail/telefone e só então segue para o WhatsApp
+  // com a mensagem original daquele botão.
+  var budgetModal = document.getElementById('budget-modal');
+  var budgetForm = document.getElementById('budget-popup-form');
+  if (budgetModal && budgetForm) {
+    var budgetLastFocus = null;
+    var budgetTargetHref = '';
+
+    function openBudgetModal(href) {
+      budgetTargetHref = href;
+      budgetLastFocus = document.activeElement;
+      budgetModal.classList.add('is-open');
+      budgetModal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('wa-modal-open');
+      var first = budgetForm.querySelector('input');
+      if (first) first.focus();
+    }
+    function closeBudgetModal() {
+      budgetModal.classList.remove('is-open');
+      budgetModal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('wa-modal-open');
+      if (budgetLastFocus) budgetLastFocus.focus();
+    }
+
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href*="api.whatsapp.com"]');
+      if (!a || (waFloat && a === waFloat) || a.closest('#wa-modal') || a.closest('#budget-modal')) return;
+      e.preventDefault();
+      openBudgetModal(a.href);
+    });
+    budgetModal.querySelectorAll('[data-wa-close]').forEach(function (el) {
+      el.addEventListener('click', closeBudgetModal);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && budgetModal.classList.contains('is-open')) closeBudgetModal();
+    });
+
+    budgetForm.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var f = budgetForm.elements;
+      var ok = true;
+      ['nome', 'email', 'telefone'].forEach(function (n) {
+        var bad = !f[n].value.trim() || (n === 'email' && !/^\S+@\S+\.\S+$/.test(f[n].value));
+        f[n].classList.toggle('invalid', bad);
+        if (bad) ok = false;
+      });
+      if (!f.robo.checked) ok = false;
+      if (!ok || !budgetTargetHref) return;
+      window.open(budgetTargetHref, '_blank', 'noopener');
+      if (window.gtag) {
+        gtag('event', 'generate_lead', { method: 'budget_popup', lead_name: f.nome.value.trim(), lead_email: f.email.value.trim() });
+      }
+      if (window.fbq) fbq('track', 'Lead');
+      budgetForm.reset();
+      closeBudgetModal();
+    });
+  }
 })();

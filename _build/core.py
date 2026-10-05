@@ -21,6 +21,10 @@ EMAIL = 'voe@isnap.com.br'
 # páginas via whatsapp_widget_html). Carrega de forma assíncrona e não altera o
 # comportamento do formulário, que continua abrindo o WhatsApp normalmente.
 WA_LEAD_CAPTURE_SCRIPT = """<script>!function(){var k="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tbnB2cml4ZHF0c2R6bWxyY2xqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5ODkzMTcsImV4cCI6MjA5NDU2NTMxN30.cYOoc_iillMB-2RuJSj7H5SG5KAw2QmB8Rj6YfmL9S8",u="https://omnpvrixdqtsdzmlrclj.supabase.co/functions/v1/leadcapture-script/ffba4a5f-da30-48d0-ad38-5d697f1b5db9/4fe09358-b15d-41b3-b5c4-9bcbf1e7acfd";var x=new XMLHttpRequest;x.open("GET",u,!0),x.setRequestHeader("apikey",k),x.onload=function(){if(200===x.status){var s=document.createElement("script");s.textContent=x.responseText;(document.head||document.body).appendChild(s)}};x.send()}();</script>"""
+
+# Script de captação de leads do CRM para o pop-up de orçamento (abre quando qualquer
+# botão de "solicitar orçamento"/CTA que levaria direto ao WhatsApp é clicado).
+BUDGET_LEAD_CAPTURE_SCRIPT = """<script>!function(){var k="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9tbnB2cml4ZHF0c2R6bWxyY2xqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5ODkzMTcsImV4cCI6MjA5NDU2NTMxN30.cYOoc_iillMB-2RuJSj7H5SG5KAw2QmB8Rj6YfmL9S8",u="https://omnpvrixdqtsdzmlrclj.supabase.co/functions/v1/leadcapture-script/ffba4a5f-da30-48d0-ad38-5d697f1b5db9/d472e15d-c926-4a32-b8d7-9ac5a91b8fcf";var x=new XMLHttpRequest;x.open("GET",u,!0),x.setRequestHeader("apikey",k),x.onload=function(){if(200===x.status){var s=document.createElement("script");s.textContent=x.responseText;(document.head||document.body).appendChild(s)}};x.send()}();</script>"""
 CLIENT_AREA_URL = 'https://app.isnap.com.br/'
 ADDRESS = 'Av. Advogado Horácio Raccanello Filho, 5570 – Zona 07, Maringá / PR – CEP 87020-035'
 PHONES = [('(44) 99992-2804', '+5544999922804')]
@@ -391,6 +395,31 @@ def whatsapp_widget_html():
   """ % (esc(WA_POPUP_URL), WA_ICON, WA_ICON)
 
 
+def budget_modal_html():
+    """Pop-up de orçamento: intercepta (via site.js) todos os cliques em botões/links
+    que levariam direto ao WhatsApp (hero, cards de solução, CTAs de página, etc.),
+    pede nome/e-mail/telefone e só então redireciona para o WhatsApp de destino."""
+    return """<div class="wa-modal" id="budget-modal" aria-hidden="true">
+    <div class="wa-modal-backdrop" data-wa-close></div>
+    <div class="wa-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="budget-modal-title">
+      <header class="wa-modal-head">
+        <h2 id="budget-modal-title">Preencha os campos abaixo para receber seu orçamento no WhatsApp</h2>
+        <button type="button" class="wa-modal-close" data-wa-close aria-label="Fechar">×</button>
+      </header>
+      <form class="wa-modal-body" id="budget-popup-form" novalidate>
+        <label class="wa-field"><span class="sr-only">Nome</span><input type="text" name="nome" placeholder="Nome" autocomplete="name" required /></label>
+        <label class="wa-field"><span class="sr-only">E-mail</span><input type="email" name="email" placeholder="E-mail" autocomplete="email" required /></label>
+        <label class="wa-field"><span class="sr-only">WhatsApp</span><input type="tel" name="telefone" placeholder="WhatsApp" autocomplete="tel" required /></label>
+        <label class="wa-robot"><input type="checkbox" name="robo" required /><span>Não sou um robô</span></label>
+        <button type="submit" class="wa-submit">%s Continuar para o WhatsApp</button>
+        <p class="wa-consent">Ao informar meus dados, eu concordo com a <a href="/politica-de-privacidade/">Política de Privacidade</a>.</p>
+      </form>
+    </div>
+  </div>
+
+  """ % WA_ICON
+
+
 def layout(path, seo, body, current=None, home=False, extra_scripts=''):
     return """<!doctype html>
 <html lang="pt-BR">
@@ -416,13 +445,15 @@ def layout(path, seo, body, current=None, home=False, extra_scripts=''):
   %s
 
   %s
+  %s
   <script src="/site.js?v=%s"></script>
+  %s
   %s
   %s
 </body>
 </html>
 """ % (seo, VERSION, VERSION, TRACKING, 'home-page' if home else 'inner-page', header_html(current, home), body, footer_html(),
-       whatsapp_widget_html(), VERSION, WA_LEAD_CAPTURE_SCRIPT, extra_scripts)
+       whatsapp_widget_html(), budget_modal_html(), VERSION, WA_LEAD_CAPTURE_SCRIPT, BUDGET_LEAD_CAPTURE_SCRIPT, extra_scripts)
 
 
 VERSION = str(int(time.time()))
