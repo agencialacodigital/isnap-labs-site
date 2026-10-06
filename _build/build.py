@@ -442,6 +442,67 @@ def build_generic(slug, crumbs_label=None, start_tier=0):
     write(path, layout(path, seo, html_body, current='/solucoes/' if slug != 'sobre-nos' else '/sobre-nos/'))
 
 
+# Cards da página /solucoes/: mesmo componente x-card/x-grid que a página já usava.
+# Pós-Graduação e Extensão mantêm o texto original (ainda correto); os outros 4 são
+# as soluções atuais, com texto adaptado do conteúdo já publicado nas páginas de cada uma.
+SOLUTIONS_PAGE_CARDS = [
+    ('Pós-Graduação ou MBA',
+     '<strong>A iSnap Labs ajuda você a estruturar seu curso livre, mentoria ou programa educacional em um formato compatível com Pós-Graduações e MBAs oferecidos por instituições de ensino superior.</strong><br>'
+     'Por meio de <strong>consultoria acadêmica e regulatória</strong>, apoiamos a organização de conteúdos, cargas horárias, matrizes curriculares e documentos necessários para que <strong>instituições de ensino</strong>, dentro de sua autonomia e da legislação vigente, possam analisar a oferta desses cursos em seu portfólio.<br>'
+     'Assim, você fortalece a qualidade e a credibilidade do seu projeto educacional, amplia seu potencial de alcance e se posiciona com muito mais profissionalismo no mercado.',
+     '/pos-graduacao-ou-mba/'),
+    ('Extensão Universitária',
+     '<strong>Eleve seu curso livre para o próximo nível com a iSnap Labs.</strong><br>'
+     'Ajudamos você a <strong>estruturar seu curso em formato compatível com Extensão Universitária</strong>, em nível de capacitação ou aperfeiçoamento, de acordo com as diretrizes educacionais vigentes.<br>'
+     'Por meio de consultoria acadêmica e regulatória, apoiamos a organização de carga horária, matriz de conteúdos e documentação necessária, <strong>facilitando a integração do seu projeto a instituições de ensino superior</strong> interessadas em ofertá-lo como curso de extensão.<br>'
+     'Assim, você aumenta a credibilidade da sua oferta, fortalece seu posicionamento e amplia o alcance do seu trabalho no mercado educacional.',
+     '/extensao-universitaria/'),
+    ('Faculdade para Experts',
+     '<strong>Transforme sua autoridade, sua audiência e seu conhecimento em uma nova operação educacional.</strong><br>'
+     'A iSnap Labs estrutura projetos para experts e infoprodutores que já construíram uma marca e querem ir além dos cursos isolados, conectando cursos livres, extensão, pós-graduação e outras soluções educacionais compatíveis em um só ecossistema.<br>'
+     'Assim, você deixa de ser percebido apenas como produtor de cursos e passa a construir uma marca educacional mais sólida e completa.',
+     '/faculdade-para-experts/'),
+    ('Faculdade In Company',
+     '<strong>Transforme sua empresa em uma nova plataforma de educação para o mercado em que ela já atua.</strong><br>'
+     'A iSnap Labs ajuda empresas de qualquer segmento a transformar conhecimento, audiência, distribuição e marca em uma nova vertical de negócio por meio da educação.<br>'
+     'Assim, sua empresa deixa de apenas atuar em um mercado e passa a contribuir também para a formação dos profissionais que atuam nele.',
+     '/faculdade-in-company/'),
+    ('Universidade Corporativa',
+     '<strong>Transforme o conhecimento da sua empresa em uma estrutura contínua de formação.</strong><br>'
+     'A iSnap Labs organiza treinamentos, processos e conhecimento técnico dispersos em trilhas estruturadas de aprendizagem para colaboradores, líderes, parceiros, franqueados ou clientes.<br>'
+     'Assim, o conhecimento deixa de depender de poucas pessoas e passa a ser transmitido com mais clareza, consistência e escala.',
+     '/universidade-corporativa/'),
+    ('Arquitetura Educacional',
+     '<strong>Descubra até onde o seu conhecimento pode chegar.</strong><br>'
+     'A iSnap Labs analisa seus produtos, sua audiência e seu modelo de negócio para desenhar uma estratégia de expansão que pode conectar cursos livres, extensão, pós-graduação, MBA e novas oportunidades de formação.<br>'
+     'Assim, você para de criar produtos isolados e passa a crescer com direção, dentro de um portfólio conectado.',
+     '/arquitetura-educacional/'),
+]
+
+
+def build_solutions_page():
+    """Página /solucoes/: preserva a URL, o layout e os componentes já existentes
+    (inner-hero + x-grid x-card + bloco de dúvidas), só atualiza a lista de serviços
+    exibida, que estava desatualizada (ainda listava Consultoria METEP, Consultoria
+    Educacional e Cursos Rápidos, serviços que não fazem mais parte do portfólio atual)."""
+    page = PAGES['solucoes']
+    path = '/solucoes/'
+    title = 'Soluções'
+    lede = 'Como ajudamos Infoprodutores a se tornarem Empreendedores da Educação?'
+    cards = ''.join(
+        '<article class="x-card"><h3>%s</h3><p>%s</p><a class="x-more" href="%s">Quero saber mais <span>↗</span></a></article>'
+        % (esc(h3), p, href) for h3, p, href in SOLUTIONS_PAGE_CARDS)
+    body = hero(title, lede, [(None, 'Soluções')]) + """
+    <section class="x-section x-section--light"><div class="container x-prose"><div class="x-grid x-grid-3">%s</div></div></section>
+    <section class="x-section"><div class="container x-statement"><h2>Dúvidas? Converse com nossa equipe sem compromisso e descubra como podemos lhe ajudar!</h2></div></section>""" % cards
+    desc = ('Conheça as soluções da iSnap Labs: Pós-Graduação ou MBA, Extensão Universitária, Faculdade para Experts, '
+            'Faculdade In Company, Universidade Corporativa e Arquitetura Educacional.')
+    yoast = dict(page.get('yoast_head_json') or {}, title='Soluções - iSnap Labs', description=desc,
+                og_title='Soluções', og_description=desc)
+    seo = head_seo(yoast, path, 'Soluções - iSnap Labs')
+    write(path, layout(path, seo, body, current='/solucoes/'))
+
+
 # ---------------------------------------------------------------- home
 def build_home():
     page = PAGES['home']
@@ -1335,7 +1396,7 @@ def main():
     for slug in ('sobre-nos', 'pos-graduacao-ou-mba', 'extensao-universitaria',
                  'consultoria-metep', 'consultoria-mentoria'):
         build_generic(slug)
-    build_generic('solucoes', start_tier=2)  # página com um único bloco: abre em cinza-claro, não em azul
+    build_solutions_page()
     for slug, data in NEW_SERVICE_PAGES.items():
         build_service_page(slug, data)
     build_contact()
