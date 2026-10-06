@@ -305,6 +305,9 @@ button, input { font: inherit; }
   html { scroll-behavior:auto; }
   *, *::before, *::after { animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important; }
   .reveal { opacity:1;transform:none; }
+  /* a vitrine de experts é decorativa, não um efeito de interface: continua rolando
+     mesmo com "Reduzir Movimento" ativado no aparelho (iOS/Android), só mais devagar */
+  .rotation-track { animation-duration:60s!important; animation-iteration-count:infinite!important; }
 }
 
 /* Internal pages */
@@ -568,7 +571,7 @@ main { background:#000; }
 .rotation-heading h2 em { color:var(--orange); font-style:normal; }
 .rotation-heading p { margin:0; color:rgba(255,255,255,.64); line-height:1.7; }
 .rotation-viewport { width:100%; margin-top:62px; overflow:hidden; }
-.rotation-track { width:max-content; display:flex; gap:22px; padding-left:max(32px,calc((100vw - 1240px) / 2)); animation:creatorRoll 34s linear infinite; }
+.rotation-track { width:max-content; display:flex; gap:22px; padding-left:max(32px,calc((100vw - 1240px) / 2)); animation:creatorRoll 34s linear infinite; will-change:transform; }
 @media (hover:hover) and (pointer:fine) { .rotation-track:hover { animation-play-state:paused; } }
 .rotation-card { width:330px; min-height:440px; padding:16px; display:flex; flex-direction:column; justify-content:space-between; border:1px solid rgba(255,255,255,.15); border-radius:22px; background:rgba(0,0,0,.3); backdrop-filter:blur(20px); }
 .rotation-card.rotation-accent { border-color:rgba(255,90,31,.68); }
@@ -580,7 +583,7 @@ main { background:#000; }
 .rotation-card small { color:var(--orange); font:600 10px Manrope; letter-spacing:.15em; text-transform:uppercase; }
 .rotation-card h3 { margin:9px 0 8px; font:600 26px/1.05 Manrope; letter-spacing:-.05em; }
 .rotation-card p { margin:0; color:rgba(255,255,255,.62); line-height:1.5; }
-@keyframes creatorRoll { to { transform:translateX(calc(-50% - 11px)); } }
+@keyframes creatorRoll { from { transform:translate3d(0,0,0); } to { transform:translate3d(calc(-50% - 11px),0,0); } }
 
 @media(max-width:760px){
   .creator-rotation { padding:84px 0 92px; }
