@@ -435,7 +435,7 @@ body { background:var(--ink); }
 .site-header .nav-shell { height:78px; padding:0; border:0; border-radius:0; color:var(--ink); background:#fff; box-shadow:none; backdrop-filter:none; }
 .site-header.scrolled .nav-shell { background:#fff; box-shadow:none; }
 .site-header .brand { min-width:170px; padding:0; border-radius:0; background:transparent; }
-.site-header .brand-logo { width:142px; filter:brightness(0) saturate(100%) invert(15%) sepia(17%) saturate(1706%) hue-rotate(153deg) brightness(95%) contrast(90%); }
+.site-header .brand-logo { width:142px; }
 .site-header .desktop-nav { gap:38px; }
 .site-header .desktop-nav a { color:#394348; font-weight:600; }
 .site-header .desktop-nav a:hover,.site-header .desktop-nav a:focus-visible { color:var(--orange); }

@@ -312,7 +312,7 @@ def header_html(current, home=False):
     return """<a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
   <header class="%s" id="topo">
     <div class="nav-shell">
-      <a class="brand" href="/" aria-label="iSnap Labs, início"><img class="brand-logo" src="/assets/isnap-logo.png?v=%s" alt="iSnap Labs" width="165" height="40" /></a>
+      <a class="brand" href="/" aria-label="iSnap Labs, início"><img class="brand-logo" src="/assets/isnap-logo-header.png?v=%s" alt="iSnap Labs" width="165" height="49" /></a>
       <nav class="desktop-nav" aria-label="Navegação principal">%s</nav>
       <a class="nav-cta" href="%s" target="_blank" rel="noopener">Área do cliente <span>↗</span></a>
       <a class="header-button" href="%s" target="_blank" rel="noopener">Falar com especialista</a>
