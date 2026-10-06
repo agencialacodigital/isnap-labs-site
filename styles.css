@@ -569,7 +569,7 @@ main { background:#000; }
 .rotation-heading p { margin:0; color:rgba(255,255,255,.64); line-height:1.7; }
 .rotation-viewport { width:100%; margin-top:62px; overflow:hidden; }
 .rotation-track { width:max-content; display:flex; gap:22px; padding-left:max(32px,calc((100vw - 1240px) / 2)); animation:creatorRoll 34s linear infinite; }
-.rotation-track:hover { animation-play-state:paused; }
+@media (hover:hover) and (pointer:fine) { .rotation-track:hover { animation-play-state:paused; } }
 .rotation-card { width:330px; min-height:440px; padding:16px; display:flex; flex-direction:column; justify-content:space-between; border:1px solid rgba(255,255,255,.15); border-radius:22px; background:rgba(0,0,0,.3); backdrop-filter:blur(20px); }
 .rotation-card.rotation-accent { border-color:rgba(255,90,31,.68); }
 .portrait-placeholder { height:248px; position:relative; display:grid; place-items:center; overflow:hidden; border:1px solid rgba(255,255,255,.17); border-radius:14px; background:rgba(255,255,255,.06); }
