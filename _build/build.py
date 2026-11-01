@@ -1354,8 +1354,11 @@ def build_sitemap():
     # Auditoria de SEO: "uncategorized" e as tags levaram noindex (páginas finas/duplicadas),
     # então saem do sitemap também — sitemap lista só o que se quer indexado.
     for c in CATS.values():
-        if c['slug'] != 'uncategorized':
-            urls.append(('%s/category/%s/' % (ORIGIN, c['slug']), max(p['modified'] for p in POSTS)[:10], '0.4'))
+        urls.append(('%s/category/%s/' % (ORIGIN, c['slug']), max(p['modified'] for p in POSTS)[:10], '0.4'))
+    for t in TAGS.values():
+        urls.append(('%s/tag/%s/' % (ORIGIN, t['slug']), max(p['modified'] for p in POSTS)[:10], '0.3'))
+    for u in load('users'):
+        urls.append(('%s/author/%s/' % (ORIGIN, u['slug']), max(p['modified'] for p in POSTS)[:10], '0.3'))
     today = __import__('datetime').date.today().isoformat()
     for slug in NEW_SERVICE_PAGES:
         urls.append(('%s/%s/' % (ORIGIN, slug), today, '0.8'))
