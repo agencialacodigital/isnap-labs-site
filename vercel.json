@@ -5,6 +5,7 @@
   "redirects": [
     { "source": "/(.*)", "has": [{ "type": "host", "value": "www.isnap.com.br" }], "destination": "https://isnap.com.br/$1", "permanent": true },
     { "source": "/home/", "destination": "/", "permanent": true },
+    { "source": "/como-criar-uma-pos-graduacao/", "destination": "/faculdade-parceira-para-pos-graduacao/", "permanent": true },
     { "source": "/sitemap_index.xml", "destination": "/sitemap.xml", "permanent": true },
     { "source": "/wp-sitemap.xml", "destination": "/sitemap.xml", "permanent": true },
     { "source": "/(post|page|category|post_tag|author)-sitemap.xml", "destination": "/sitemap.xml", "permanent": true },
