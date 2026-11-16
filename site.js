@@ -65,6 +65,20 @@
     });
   });
 
+  // Conversão de lead (envio de formulário com nome, e-mail e telefone).
+  // Dispara: Google Ads (conta iSnap Educação), GA4 (generate_lead) e Meta (Lead).
+  // Nunca enviar nome, e-mail ou telefone nos parâmetros dos eventos (política do GA4).
+  var ADS_LEAD_CONVERSION = 'AW-18578354517/DDj6CL6OvbkdENXi7JpF';
+  function trackLead(method) {
+    try {
+      if (window.gtag) {
+        gtag('event', 'generate_lead', { method: method });
+        gtag('event', 'conversion', { send_to: ADS_LEAD_CONVERSION, value: 1.0, currency: 'BRL' });
+      }
+      if (window.fbq) fbq('track', 'Lead');
+    } catch (err) { /* rastreamento nunca pode travar o envio do formulário */ }
+  }
+
   // Formulário de contato: monta a mensagem e abre o WhatsApp da iSnap Labs
   var form = document.getElementById('contact-form');
   if (form) {
@@ -83,8 +97,7 @@
         (f.telefone.value.trim() ? '\nTelefone: ' + f.telefone.value.trim() : '') +
         '\n\n' + f.mensagem.value.trim();
       window.open('https://api.whatsapp.com/send?phone=' + form.dataset.wa + '&text=' + encodeURIComponent(txt), '_blank', 'noopener');
-      if (window.gtag) gtag('event', 'generate_lead', { method: 'contact_form' });
-      if (window.fbq) fbq('track', 'Lead');
+      trackLead('contact_form');
     });
   }
 
@@ -140,11 +153,8 @@
       });
       if (!f.robo.checked) ok = false;
       if (!ok) return;
+      trackLead('whatsapp_popup');
       window.open(waFloat.getAttribute('href'), '_blank', 'noopener');
-      if (window.gtag) {
-        gtag('event', 'generate_lead', { method: 'whatsapp_popup', lead_name: f.nome.value.trim(), lead_email: f.email.value.trim() });
-      }
-      if (window.fbq) fbq('track', 'Lead');
       waForm.reset();
       closeWaModal();
     });
@@ -200,11 +210,8 @@
       });
       if (!f.robo.checked) ok = false;
       if (!ok || !budgetTargetHref) return;
+      trackLead('budget_popup');
       window.open(budgetTargetHref, '_blank', 'noopener');
-      if (window.gtag) {
-        gtag('event', 'generate_lead', { method: 'budget_popup', lead_name: f.nome.value.trim(), lead_email: f.email.value.trim() });
-      }
-      if (window.fbq) fbq('track', 'Lead');
       budgetForm.reset();
       closeBudgetModal();
     });
