@@ -444,3 +444,8 @@ body.wa-modal-open { overflow: hidden; }
 @media (max-width: 860px) { .x-article .x-flow-steps { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 520px) { .x-article .x-flow-steps { grid-template-columns: 1fr; } }
 .x-post-layout > * { min-width: 0; }
+
+/* Home: título do hero mais longo (Pós-Graduação ou Extensão Universitária) */
+.hero.hero-has-banner h1 { font-size: clamp(34px, 3.9vw, 56px); line-height: 1.06; }
+.hero.hero-has-banner .hero-copy > p { font-size: clamp(16px, 1.25vw, 18px); max-width: 560px; }
+.nowrap { white-space: nowrap; }

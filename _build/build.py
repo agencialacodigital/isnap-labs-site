@@ -518,11 +518,11 @@ def build_home():
         idx = B.index(head)
         return B[idx + 1]['html'] if idx + 1 < len(B) and B[idx + 1]['kind'] == 'p' else ''
 
-    h1 = 'A <em>Educação do futuro</em> começa com você!'
+    h1 = 'Transforme seu conhecimento em <em><span class="nowrap">Pós-Graduação</span> ou Extensão Universitária.</em>'
     about_h2 = first('h', 'Ajudamos Infoprodutores', 2)
     about_p = para_after(about_h2)
     about_h2_html = re.sub(r'(metodologia reconhecida)', r'<span>\1</span>', about_h2['html'], count=1, flags=re.I)
-    lede = 'Engenharia educacional para experts, infoprodutores e empresas que querem transformar conhecimento em produtos educacionais de maior valor.'
+    lede = 'Ajudamos experts, infoprodutores e empresas a criar novos produtos educacionais, ampliar seu portfólio e gerar novas oportunidades de faturamento, em parceria com instituições de ensino credenciadas pelo MEC.'
 
     # benefícios numerados (H2 digit + H5 + P?)
     ben = []
