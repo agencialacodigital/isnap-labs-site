@@ -504,6 +504,26 @@ def build_solutions_page():
 
 
 # ---------------------------------------------------------------- home
+HOME_SEO_TITLE = 'Crie sua Pós-Graduação ou Extensão Universitária | iSnap Labs'
+HOME_SEO_DESC = ('Transforme seu curso livre em um projeto de pós-graduação ou extensão universitária. '
+                 'A iSnap Labs ajuda experts a criar novos produtos educacionais.')
+
+
+def home_yoast(y):
+    """Título e descrição da home alinhados ao H1 e às palavras-chave da campanha."""
+    y = dict(y or {}, title=HOME_SEO_TITLE, description=HOME_SEO_DESC,
+             og_title=HOME_SEO_TITLE, og_description=HOME_SEO_DESC)
+    schema = y.get('schema')
+    if schema and isinstance(schema.get('@graph'), list):
+        schema = dict(schema, **{'@graph': [dict(n) for n in schema['@graph']]})
+        for node in schema['@graph']:
+            if node.get('@type') == 'WebPage':
+                node['name'] = HOME_SEO_TITLE
+                node['description'] = HOME_SEO_DESC
+        y['schema'] = schema
+    return y
+
+
 def build_home():
     page = PAGES['home']
     B = [b for b in parse_blocks(localize(page['content']['rendered']))]
@@ -746,7 +766,7 @@ def build_home():
        solutions_note,
        why_intro, cta_button('Quero saber mais'), out_html,
        rotation_html, blog_h2, cards, cta_button('Agendar consultoria estratégica', 'button-light'))
-    seo = head_seo(page.get('yoast_head_json'), '/', 'iSnap Labs')
+    seo = head_seo(home_yoast(page.get('yoast_head_json')), '/', 'iSnap Labs')
     write('/', layout('/', seo, body, current='/', home=True))
 
 
